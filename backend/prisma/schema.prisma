@@ -1,0 +1,43 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String
+  role            String           @default("farmer")
+  createdAt       DateTime         @default(now())
+  soilAnalyses    SoilAnalysis[]
+  calendarEvents  CalendarEvent[]
+}
+
+model SoilAnalysis {
+  id             String   @id @default(uuid())
+  userId         String
+  imageUrl       String
+  classifiedType String
+  confidence     Float
+  pH             Float
+  nitrogen       String
+  phosphorus     String
+  potassium      String
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CalendarEvent {
+  id         String   @id @default(uuid())
+  userId     String
+  cropName   String
+  action     String
+  eventDate  DateTime
+  completed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
