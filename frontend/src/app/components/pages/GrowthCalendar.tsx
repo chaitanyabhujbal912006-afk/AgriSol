@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Calendar as CalendarIcon, 
   ChevronLeft, 
@@ -117,6 +117,14 @@ const activityTypes = {
 
 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+interface BackendEvent {
+  id: string;
+  cropName: string;
+  action: string;
+  eventDate: string;
+  completed: boolean;
+}
+
 export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -132,9 +140,52 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
     notes: '',
     duration: ''
   });
+  const [backendEvents, setBackendEvents] = useState<BackendEvent[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  // Fetch events from backend on mount
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const token = localStorage.getItem('agrisol_token');
+      if (!token) return;
+      try {
+        const res = await fetch('http://localhost:5000/api/v1/calendar/events', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && data.events) {
+          setBackendEvents(data.events);
+        }
+      } catch {
+        // Backend offline – static data will show
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  // Merge backend events into the calendar activity shape for display
+  const allActivities = [
+    ...calendarActivities,
+    ...backendEvents.map(ev => ({
+      id: ev.id as any,
+      title: `${ev.action} - ${ev.cropName}`,
+      date: new Date(ev.eventDate),
+      type: ev.action.toLowerCase().includes('irrigat') ? 'irrigation'
+           : ev.action.toLowerCase().includes('harvest') ? 'harvest'
+           : ev.action.toLowerCase().includes('fertil') ? 'fertilizer'
+           : 'sowing',
+      crop: ev.cropName,
+      field: 'My Field',
+      status: ev.completed ? 'completed' : 'scheduled',
+      priority: 'medium',
+      notes: '',
+      duration: ''
+    }))
+  ];
 
   const getActivitiesForDate = (date: Date) => {
-    return calendarActivities.filter(activity => 
+    return allActivities.filter(activity => 
       activity.date.toDateString() === date.toDateString()
     );
   };
@@ -158,9 +209,34 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
     }
   };
 
-  const handleAddActivity = () => {
-    // In real app, would save to database
-    console.log('Adding new activity:', newActivity);
+  const handleAddActivity = async () => {
+    if (!newActivity.title || !newActivity.date || !newActivity.crop) {
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem('agrisol_token');
+      const res = await fetch('http://localhost:5000/api/v1/calendar/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          cropName: newActivity.crop,
+          action: newActivity.title || newActivity.type || 'Activity',
+          eventDate: newActivity.date
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.event) {
+        setBackendEvents(prev => [...prev, data.event]);
+      }
+    } catch {
+      // Backend offline – activity will not persist, but UX carries on
+    } finally {
+      setIsSaving(false);
+    }
     setShowAddDialog(false);
     setNewActivity({
       title: '',
@@ -172,6 +248,27 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
       notes: '',
       duration: ''
     });
+  };
+
+  const handleToggleComplete = async (eventId: string) => {
+    setTogglingId(eventId);
+    try {
+      const token = localStorage.getItem('agrisol_token');
+      const res = await fetch(`http://localhost:5000/api/v1/calendar/events/${eventId}/toggle`, {
+        method: 'PATCH',
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
+      const data = await res.json();
+      if (data.success && data.event) {
+        setBackendEvents(prev =>
+          prev.map(ev => ev.id === eventId ? { ...ev, completed: data.event.completed } : ev)
+        );
+      }
+    } catch {
+      // Backend offline
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   return (
@@ -292,8 +389,8 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
                   <Button variant="outline" onClick={() => setShowAddDialog(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleAddActivity} className="bg-primary-green hover:bg-primary-green/90 text-white">
-                    Add Activity
+                  <Button onClick={handleAddActivity} className="bg-primary-green hover:bg-primary-green/90 text-white" disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Add Activity'}
                   </Button>
                 </div>
               </div>
@@ -413,7 +510,7 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {calendarActivities.map((activity, index) => (
+                {allActivities.map((activity, index) => (
                   <div key={activity.id} className="flex items-start gap-4">
                     <div className="flex flex-col items-center">
                       <div className={`p-2 rounded-full ${activityTypes[activity.type as keyof typeof activityTypes]?.color} text-white`}>
@@ -470,13 +567,13 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
                     {status === 'scheduled' && <CalendarIcon className="w-5 h-5 text-blue-500" />}
                     {status} Tasks
                     <Badge className="ml-auto">
-                      {calendarActivities.filter(a => a.status === status).length}
+                      {allActivities.filter(a => a.status === status).length}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {calendarActivities
+                    {allActivities
                       .filter(activity => activity.status === status)
                       .map((activity) => (
                         <div key={activity.id} className="p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors">
@@ -492,7 +589,18 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
                             </div>
                             <div className={`w-2 h-2 rounded-full ${getPriorityColor(activity.priority)}`} />
                           </div>
-                          <div className="flex items-center justify-end">
+                          <div className="flex items-center justify-end gap-2">
+                            {typeof activity.id === 'string' && backendEvents.find(e => e.id === activity.id) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleToggleComplete(activity.id as string)}
+                                disabled={togglingId === activity.id}
+                                className="text-xs"
+                              >
+                                {togglingId === activity.id ? '...' : activity.status === 'completed' ? 'Undo' : 'Done'}
+                              </Button>
+                            )}
                             <Button variant="ghost" size="sm">
                               <Edit className="w-3 h-3" />
                             </Button>

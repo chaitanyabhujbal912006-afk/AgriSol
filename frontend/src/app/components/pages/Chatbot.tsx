@@ -47,7 +47,7 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
   const [isTyping, setIsTyping] = useState(false);
   const [language, setLanguage] = useState('English');
 
-  const handleSendMessage = (message: string = inputMessage) => {
+  const handleSendMessage = async (message: string = inputMessage) => {
     if (!message.trim()) return;
 
     // Add user message
@@ -62,8 +62,27 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const token = localStorage.getItem('agrisol_token');
+      const res = await fetch('http://localhost:5000/api/v1/chatbot/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ message })
+      });
+      const data = await res.json();
+      const replyText = data.success && data.reply ? data.reply : generateResponse(message);
+      const aiMessage = {
+        id: Date.now() + 1,
+        type: 'bot' as const,
+        content: replyText,
+        timestamp: data.timestamp || new Date().toISOString()
+      };
+      setMessages(prev => [...prev, aiMessage]);
+    } catch {
+      // Backend offline – use local response
       const botResponse = generateResponse(message);
       const aiMessage = {
         id: Date.now() + 1,
@@ -71,10 +90,10 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
         content: botResponse,
         timestamp: new Date().toISOString()
       };
-      
       setMessages(prev => [...prev, aiMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const generateResponse = (query: string) => {

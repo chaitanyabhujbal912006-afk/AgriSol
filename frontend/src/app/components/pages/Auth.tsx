@@ -49,9 +49,11 @@ export function Auth({ onNavigate }: AuthProps) {
   const [rememberMe, setRememberMe] = useState(false);
   const [selectedRole, setSelectedRole] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
+    mobile: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
     firstName: '',
@@ -65,33 +67,105 @@ export function Auth({ onNavigate }: AuthProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSignIn = (e: React.FormEvent) => {
+  // Backend1 API base
+  const API = 'http://localhost:5000/api/v1';
+
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock sign in - in real app would validate credentials
-    onNavigate('dashboard');
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mobile: formData.mobile,
+          password: formData.password
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        localStorage.setItem('agrisol_token', data.data.accessToken);
+        localStorage.setItem('agrisol_user', JSON.stringify(data.data.user));
+        onNavigate('dashboard');
+      } else {
+        alert(data.message || 'Sign in failed. Please check your credentials.');
+      }
+    } catch (err) {
+      console.error('Sign in error:', err);
+      alert('Unable to connect to the backend server. Please make sure it is running on port 5000.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleSignIn = () => {
-    // Mock Google sign in - in real app would integrate with Google OAuth
-    console.log('Google Sign In initiated');
-    // Simulate successful Google authentication
-    onNavigate('dashboard');
-  };
-
-  const handleGoogleSignUp = () => {
-    // Mock Google sign up - in real app would integrate with Google OAuth
-    console.log('Google Sign Up initiated');
-    // For new users, might want to collect additional info
-    setAuthStep('role');
-  };
-
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthStep('verify');
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          mobile: formData.mobile,
+          email: formData.email,
+          password: formData.password,
+          preferredLanguage: selectedLanguage,
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAuthStep('verify');
+      } else {
+        alert(data.message || 'Registration failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Sign up error:', err);
+      alert('Unable to connect to the backend server. Please make sure it is running on port 5000.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerification = () => {
-    setAuthStep('role');
+  const handleVerifyOTP = async () => {
+    const otp = otpCode.join('');
+    if (otp.length < 6) {
+      alert('Please enter the complete 6-digit OTP.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: formData.mobile, otp })
+      });
+      const data = await response.json();
+      if (data.success) {
+        localStorage.setItem('agrisol_token', data.data.accessToken);
+        localStorage.setItem('agrisol_user', JSON.stringify(data.data.user));
+        setAuthStep('role');
+      } else {
+        alert(data.message || 'Invalid OTP. Please try again.');
+      }
+    } catch (err) {
+      console.error('OTP verify error:', err);
+      alert('Unable to connect to the backend server.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOtpInput = (index: number, value: string) => {
+    if (value.length > 1) return;
+    const newOtp = [...otpCode];
+    newOtp[index] = value;
+    setOtpCode(newOtp);
+    // Auto-focus next input
+    if (value && index < 5) {
+      const next = document.getElementById(`otp-${index + 1}`);
+      next?.focus();
+    }
   };
 
   const handleRoleSelection = () => {
@@ -108,6 +182,14 @@ export function Auth({ onNavigate }: AuthProps) {
 
   const handleSuccess = () => {
     onNavigate('dashboard');
+  };
+
+  const handleGoogleSignIn = () => {
+    alert('Google Sign-In is not configured yet. Please use mobile and password login.');
+  };
+
+  const handleGoogleSignUp = () => {
+    alert('Google Sign-Up is not configured yet. Please use mobile and password registration.');
   };
 
   return (
@@ -178,18 +260,18 @@ export function Auth({ onNavigate }: AuthProps) {
                       </div>
                     </div>
 
-                    {/* Traditional Sign In Form */}
+                    {/* Sign In Form */}
                     <form onSubmit={handleSignIn} className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="text-white">Email or Phone</Label>
+                        <Label className="text-white">Mobile Number</Label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
-                            type="text"
-                            placeholder="Enter email or phone number"
+                            type="tel"
+                            placeholder="e.g. 9876543210"
                             className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                            value={formData.email}
-                            onChange={(e) => handleInputChange('email', e.target.value)}
+                            value={formData.mobile}
+                            onChange={(e) => handleInputChange('mobile', e.target.value)}
                             required
                           />
                         </div>
@@ -232,8 +314,8 @@ export function Auth({ onNavigate }: AuthProps) {
                         </Button>
                       </div>
 
-                      <Button type="submit" className="w-full clay-button bg-primary-green hover:bg-primary-green/90 text-white">
-                        Sign In
+                      <Button type="submit" disabled={isLoading} className="w-full clay-button text-white">
+                        {isLoading ? 'Signing In...' : 'Sign In'}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </form>
@@ -291,7 +373,7 @@ export function Auth({ onNavigate }: AuthProps) {
                       </div>
                     </div>
 
-                    {/* Traditional Sign Up Form */}
+                    {/* Sign Up Form */}
                     <form onSubmit={handleSignUp} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -317,7 +399,22 @@ export function Auth({ onNavigate }: AuthProps) {
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-white">Email</Label>
+                        <Label className="text-white">Mobile Number *</Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            type="tel"
+                            placeholder="e.g. 9876543210"
+                            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                            value={formData.mobile}
+                            onChange={(e) => handleInputChange('mobile', e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-white">Email (optional)</Label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
@@ -326,21 +423,6 @@ export function Auth({ onNavigate }: AuthProps) {
                             className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
                             value={formData.email}
                             onChange={(e) => handleInputChange('email', e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-white">Phone Number</Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            type="tel"
-                            placeholder="+91 98765 43210"
-                            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
-                            value={formData.phone}
-                            onChange={(e) => handleInputChange('phone', e.target.value)}
                           />
                         </div>
                       </div>
@@ -369,8 +451,8 @@ export function Auth({ onNavigate }: AuthProps) {
                         </p>
                       </div>
 
-                      <Button type="submit" className="w-full clay-button bg-primary-green hover:bg-primary-green/90 text-white">
-                        Create Account
+                      <Button type="submit" disabled={isLoading} className="w-full clay-button text-white">
+                        {isLoading ? 'Creating Account...' : 'Create Account'}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </form>
@@ -392,43 +474,62 @@ export function Auth({ onNavigate }: AuthProps) {
               </Tabs>
             )}
 
-            {/* Email/OTP Verification */}
+            {/* OTP Verification */}
             {authStep === 'verify' && (
               <div className="text-center space-y-6">
                 <div className="w-16 h-16 bg-harvest-yellow rounded-full flex items-center justify-center mx-auto">
-                  <Mail className="w-8 h-8 text-neutral-900" />
+                  <Phone className="w-8 h-8 text-neutral-900" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">Verify Your Email</h3>
+                  <h3 className="text-xl font-semibold text-white mb-2">Verify Your Mobile</h3>
                   <p className="text-white/80 text-sm">
-                    We've sent a verification code to your email address. 
-                    Please enter the 6-digit code below.
+                    We've sent a 6-digit OTP to <strong>{formData.mobile}</strong>. Enter it below.
                   </p>
                 </div>
                 
                 <div className="flex justify-center gap-2">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
                     <Input
                       key={i}
+                      id={`otp-${i}`}
                       type="text"
                       maxLength={1}
                       className="w-12 h-12 text-center text-xl font-bold bg-white/10 border-white/20 text-white"
+                      value={otpCode[i]}
+                      onChange={(e) => handleOtpInput(i, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Backspace' && !otpCode[i] && i > 0) {
+                          document.getElementById(`otp-${i - 1}`)?.focus();
+                        }
+                      }}
                     />
                   ))}
                 </div>
 
                 <div className="space-y-4">
                   <Button 
-                    onClick={handleVerification}
-                    className="w-full clay-button bg-primary-green hover:bg-primary-green/90 text-white"
+                    onClick={handleVerifyOTP}
+                    disabled={isLoading}
+                    className="w-full clay-button text-white"
                   >
-                    Verify Email
+                    {isLoading ? 'Verifying...' : 'Verify OTP'}
                   </Button>
                   
                   <p className="text-sm text-white/60">
                     Didn't receive the code?{' '}
-                    <Button variant="link" className="text-harvest-yellow hover:text-harvest-yellow/80 p-0 h-auto text-sm">
-                      Resend Code
+                    <Button variant="link" className="text-harvest-yellow hover:text-harvest-yellow/80 p-0 h-auto text-sm"
+                      onClick={async () => {
+                        try {
+                          await fetch(`${API}/auth/resend-otp`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ mobile: formData.mobile })
+                          });
+                          alert('OTP resent!');
+                        } catch {}
+                      }}
+                    >
+                      Resend OTP
                     </Button>
                   </p>
                 </div>

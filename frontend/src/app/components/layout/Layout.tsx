@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Home, 
   Sprout, 
@@ -27,6 +27,7 @@ import { Input } from '../ui/input';
 interface LayoutProps {
   children: React.ReactNode;
   currentPage?: string;
+  onNavigate?: (page: string) => void;
 }
 
 const navigationItems = [
@@ -36,10 +37,12 @@ const navigationItems = [
   { id: 'plant-explorer', label: 'Plant Explorer', icon: BookOpen, path: '/plant-explorer' },
   { id: 'disease-library', label: 'Disease Library', icon: Bug, path: '/disease-library' },
   { id: 'growth-calendar', label: 'Growth Calendar', icon: Calendar, path: '/growth-calendar' },
+  { id: 'chatbot', label: 'AI Adviser', icon: MessageSquare, path: '/chatbot' },
   { id: 'video-hub', label: 'Video Hub', icon: Video, path: '/video-hub' },
-  { id: 'feedback', label: 'Feedback', icon: MessageSquare, path: '/feedback' },
-  { id: 'reports', label: 'Reports', icon: FileText, path: '/reports' },
+  { id: 'feedback', label: 'Feedback', icon: FileText, path: '/feedback' },
+  { id: 'reports', label: 'Reports', icon: BarChart3, path: '/reports' },
   { id: 'subscription', label: 'Subscription', icon: CreditCard, path: '/subscription' },
+  { id: 'logout', label: 'Logout', icon: X, path: '/logout' },
 ];
 
 const mobileNavItems = [
@@ -47,12 +50,27 @@ const mobileNavItems = [
   { id: 'crop-recommendation', label: 'Crops', icon: Sprout },
   { id: 'plant-explorer', label: 'Plants', icon: BookOpen },
   { id: 'growth-calendar', label: 'Calendar', icon: Calendar },
-  { id: 'more', label: 'More', icon: Menu },
+  { id: 'logout', label: 'Logout', icon: X },
 ];
 
-export function Layout({ children, currentPage = 'dashboard' }: LayoutProps) {
+export function Layout({ children, currentPage = 'dashboard', onNavigate }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [language, setLanguage] = useState('EN');
+  const [userDisplay, setUserDisplay] = useState({ name: 'Farmer', initials: 'F', role: 'farmer' });
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('agrisol_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const email = user.email || '';
+        const namePart = email.split('@')[0] || 'Farmer';
+        const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        const initials = displayName.slice(0, 2).toUpperCase();
+        setUserDisplay({ name: displayName, initials, role: user.role || 'farmer' });
+      } catch {}
+    }
+  }, []);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -60,16 +78,18 @@ export function Layout({ children, currentPage = 'dashboard' }: LayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-border
-        transform transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 z-50 h-full w-64 bg-white/80 backdrop-blur-xl border-r border-border
+        transform transition-transform duration-300 ease-in-out shadow-lg
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-green rounded-lg flex items-center justify-center">
-              <Sprout className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-green to-primary-green-dark rounded-xl flex items-center justify-center shadow-md">
+              <Sprout className="w-6 h-6 text-white" />
             </div>
-            <span className="font-semibold text-lg text-foreground">FarmerAI</span>
+            <span className="font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-primary-green to-primary-green-dark">
+              FarmerAI
+            </span>
           </div>
           <Button
             variant="ghost"
@@ -89,14 +109,18 @@ export function Layout({ children, currentPage = 'dashboard' }: LayoutProps) {
             return (
               <button
                 key={item.id}
+                onClick={() => onNavigate && onNavigate(item.id)}
                 className={`
-                  w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left
-                  transition-all duration-200 hover:bg-secondary
-                  ${isActive ? 'bg-primary-green text-white' : 'text-foreground hover:text-foreground'}
+                  w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
+                  transition-all duration-300 font-medium
+                  ${isActive 
+                    ? 'bg-gradient-to-r from-primary-green/90 to-primary-green text-white shadow-md transform scale-[1.02]' 
+                    : 'text-muted-foreground hover:bg-neutral-100 hover:text-foreground'
+                  }
                 `}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-sm font-medium">{item.label}</span>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                <span>{item.label}</span>
               </button>
             );
           })}
@@ -106,7 +130,7 @@ export function Layout({ children, currentPage = 'dashboard' }: LayoutProps) {
       {/* Main Content */}
       <div className="lg:ml-64">
         {/* Top Bar */}
-        <header className="bg-white border-b border-border px-4 lg:px-6 py-4">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-border px-4 lg:px-6 py-4 shadow-sm">
           <div className="flex items-center justify-between">
             {/* Left Side */}
             <div className="flex items-center gap-4">
@@ -145,12 +169,12 @@ export function Layout({ children, currentPage = 'dashboard' }: LayoutProps) {
               {/* User Menu */}
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block text-right">
-                  <p className="text-sm font-medium">John Farmer</p>
-                  <p className="text-xs text-muted-foreground">Farmer</p>
+                  <p className="text-sm font-medium">{userDisplay.name}</p>
+                  <p className="text-xs text-muted-foreground capitalize">{userDisplay.role}</p>
                 </div>
                 <Avatar className="w-8 h-8">
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary-green text-white">JF</AvatarFallback>
+                  <AvatarFallback className="bg-primary-green text-white">{userDisplay.initials}</AvatarFallback>
                 </Avatar>
               </div>
             </div>
@@ -173,6 +197,7 @@ export function Layout({ children, currentPage = 'dashboard' }: LayoutProps) {
             return (
               <button
                 key={item.id}
+                onClick={() => onNavigate && onNavigate(item.id)}
                 className={`
                   flex flex-col items-center gap-1 px-3 py-2 rounded-lg
                   transition-colors duration-200

@@ -82,6 +82,10 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Dynamic analysis states connected to full-stack backend
+  const [predictedSoilTypes, setPredictedSoilTypes] = useState<any[]>(soilTypes);
+  const [detailedAnalysis, setDetailedAnalysis] = useState<any>(mockAnalysis);
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -135,11 +139,53 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
     }, 200);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!uploadedImage) return;
     setUploadState('analyzing');
-    setTimeout(() => {
-      setUploadState('results');
-    }, 3000);
+    
+    try {
+      const token = localStorage.getItem('agrisol_token');
+      const resBlob = await fetch(uploadedImage);
+      const blob = await resBlob.blob();
+      
+      const formData = new FormData();
+      formData.append('file', blob, 'soil-sample.jpg');
+      
+      const response = await fetch('http://localhost:5000/api/v1/soil/analyze', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setPredictedSoilTypes(data.soilTypes);
+        setDetailedAnalysis({
+          pH: data.analysis.pH,
+          nitrogen: data.analysis.nitrogen,
+          phosphorus: data.analysis.phosphorus,
+          potassium: data.analysis.potassium,
+          organicMatter: 'High',
+          salinity: 'Low',
+          recommendations: [
+            'Soil pH is optimal for most crops',
+            'Consider adding potassium-rich fertilizers',
+            'Organic matter content is excellent',
+            'Monitor salinity levels regularly'
+          ]
+        });
+        setUploadState('results');
+      } else {
+        alert(data.message || 'Soil analysis failed. Please verify credentials.');
+        setUploadState('uploaded');
+      }
+    } catch (err) {
+      console.error('Soil prediction error:', err);
+      alert('Unable to connect to the backend server. Please verify it is running on Port 5000.');
+      setUploadState('uploaded');
+    }
   };
 
   const handleReset = () => {
@@ -333,7 +379,7 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
 
                 <TabsContent value="soil-type" className="space-y-4">
                   <div className="space-y-3">
-                    {soilTypes.map((soil, index) => (
+                    {predictedSoilTypes.map((soil, index) => (
                       <div
                         key={soil.type}
                         className={`p-4 rounded-lg border transition-colors ${
@@ -342,7 +388,7 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded-full ${soil.color}`} />
+                            <div className={`w-4 h-4 rounded-full ${soil.color || 'bg-green-500'}`} />
                             <h4 className="font-semibold text-foreground">{soil.type}</h4>
                             {index === 0 && (
                               <Badge className="bg-primary-green text-white">Best Match</Badge>
@@ -357,7 +403,7 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
                         
                         <div className="space-y-2">
                           <div className="flex flex-wrap gap-1">
-                            {soil.characteristics.map((char) => (
+                            {soil.characteristics.map((char: string) => (
                               <Badge key={char} variant="outline" className="text-xs">
                                 {char}
                               </Badge>
@@ -367,7 +413,7 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
                           <div>
                             <p className="text-xs text-muted-foreground mb-1">Suitable Crops:</p>
                             <div className="flex flex-wrap gap-1">
-                              {soil.suitableCrops.map((crop) => (
+                              {soil.suitableCrops.map((crop: string) => (
                                 <Badge key={crop} className="text-xs bg-green-100 text-green-800">
                                   {crop}
                                 </Badge>
@@ -384,25 +430,25 @@ export function SoilPrediction({ onNavigate }: SoilPredictionProps) {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-sm text-muted-foreground">pH Level</p>
-                      <p className="text-lg font-semibold text-foreground">{mockAnalysis.pH}</p>
+                      <p className="text-lg font-semibold text-foreground">{detailedAnalysis.pH}</p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-sm text-muted-foreground">Nitrogen</p>
-                      <p className="text-lg font-semibold text-foreground">{mockAnalysis.nitrogen}</p>
+                      <p className="text-lg font-semibold text-foreground">{detailedAnalysis.nitrogen}</p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-sm text-muted-foreground">Phosphorus</p>
-                      <p className="text-lg font-semibold text-foreground">{mockAnalysis.phosphorus}</p>
+                      <p className="text-lg font-semibold text-foreground">{detailedAnalysis.phosphorus}</p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50">
                       <p className="text-sm text-muted-foreground">Potassium</p>
-                      <p className="text-lg font-semibold text-foreground">{mockAnalysis.potassium}</p>
+                      <p className="text-lg font-semibold text-foreground">{detailedAnalysis.potassium}</p>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <h4 className="font-semibold text-foreground">Recommendations</h4>
-                    {mockAnalysis.recommendations.map((rec, index) => (
+                    {detailedAnalysis.recommendations.map((rec: string, index: number) => (
                       <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
                         <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
                         <p className="text-sm text-blue-800">{rec}</p>

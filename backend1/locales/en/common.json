@@ -1,0 +1,16 @@
+{
+  "welcome": "Welcome to AgriSol",
+  "login_success": "Login successful",
+  "logout_success": "Logged out successfully",
+  "otp_sent": "OTP sent to your mobile number",
+  "otp_verified": "Mobile number verified successfully",
+  "profile_updated": "Profile updated successfully",
+  "crop_added": "Crop added successfully",
+  "disease_submitted": "Disease report submitted. Analysis in progress.",
+  "scheme_not_found": "Scheme not found",
+  "unauthorized": "You are not logged in. Please log in to access this resource.",
+  "forbidden": "You do not have permission to perform this action.",
+  "validation_failed": "Validation failed",
+  "server_error": "Something went wrong. Please try again.",
+  "not_found": "Resource not found"
+}

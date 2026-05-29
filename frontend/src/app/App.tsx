@@ -44,25 +44,94 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<'farmer' | 'admin'>('farmer');
 
-  const handleNavigation = (page: PageType, data?: NavigationData) => {
+  React.useEffect(() => {
+    // Check authentication
+    const checkAuth = () => {
+      const token = localStorage.getItem('agrisol_token');
+      const userStr = localStorage.getItem('agrisol_user');
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setIsAuthenticated(true);
+          setUserRole(user.role || 'farmer');
+          return true;
+        } catch (e) {
+          localStorage.removeItem('agrisol_token');
+          localStorage.removeItem('agrisol_user');
+        }
+      }
+      return false;
+    };
+    
+    const isAuth = checkAuth();
+
+    // Handle browser back/forward buttons
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.page) {
+        setCurrentPage(event.state.page);
+        if (event.state.data) setNavigationData(event.state.data);
+      } else {
+        const path = window.location.pathname.replace('/', '');
+        setCurrentPage((path || (isAuth ? 'dashboard' : 'landing')) as PageType);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Set initial page from URL or fallback
+    const path = window.location.pathname.replace('/', '');
+    let initialPage = path || (isAuth ? 'dashboard' : 'landing');
+    
+    if (initialPage !== 'landing' && initialPage !== 'auth' && !isAuth) {
+      initialPage = 'landing';
+    }
+    
+    setCurrentPage(initialPage as PageType);
+    window.history.replaceState(
+      { page: initialPage, data: {} }, 
+      '', 
+      '/' + (initialPage === 'landing' ? '' : initialPage)
+    );
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleNavigation = (page: PageType | 'logout', data?: NavigationData) => {
+    if (page === 'logout') {
+      localStorage.removeItem('agrisol_token');
+      localStorage.removeItem('agrisol_user');
+      setIsAuthenticated(false);
+      setCurrentPage('landing');
+      window.history.pushState({ page: 'landing', data: {} }, '', '/');
+      return;
+    }
+
+    let targetPage = page;
     // Handle special navigation cases
     switch (page) {
       case 'soil-test':
-        setCurrentPage('soil-prediction');
+        targetPage = 'soil-prediction';
         break;
       case 'video-tutorials':
-        setCurrentPage('video-hub');
+        targetPage = 'video-hub';
         break;
-      default:
-        setCurrentPage(page);
     }
+    
+    setCurrentPage(targetPage as PageType);
     
     if (data) {
       setNavigationData(data);
     }
 
+    // Push state to browser history
+    window.history.pushState(
+      { page: targetPage, data: data || {} }, 
+      '', 
+      '/' + (targetPage === 'landing' ? '' : targetPage)
+    );
+
     // Handle authentication flow
-    if (page === 'dashboard' && !isAuthenticated) {
+    if (targetPage === 'dashboard' && !isAuthenticated) {
       setIsAuthenticated(true);
     }
   };
@@ -132,7 +201,7 @@ export default function App() {
   // Show authenticated pages with layout
   return (
     <>
-      <Layout currentPage={currentPage.replace('-', '')}>
+      <Layout currentPage={currentPage} onNavigate={handleNavigation}>
         {renderPage()}
       </Layout>
       <Toaster />

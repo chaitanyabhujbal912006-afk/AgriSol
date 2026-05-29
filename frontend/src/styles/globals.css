@@ -1,13 +1,18 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Agricultural Design System Colors */
-  --primary-green: #2E7D32;
-  --harvest-yellow: #F6C945;
-  --info-blue: #1E88E5;
-  --success-green: #2E7D32;
-  --warning-yellow: #F6C445;
-  --danger-red: #D32F2F;
+  /* Agricultural Design System Colors - VIBRANT UPDATE */
+  --primary-green: #10B981; /* Emerald 500 */
+  --primary-green-dark: #047857; /* Emerald 700 */
+  --harvest-yellow: #F59E0B; /* Amber 500 */
+  --info-blue: #3B82F6; /* Blue 500 */
+  --success-green: #10B981;
+  --warning-yellow: #F59E0B;
+  --danger-red: #EF4444; /* Red 500 */
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #10B981 0%, #047857 100%);
+  --gradient-accent: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
   
   /* Neutral Scale */
   --neutral-900: #0B0F14;
@@ -36,16 +41,17 @@
   --radius-lg: 1.5rem;   /* 24px */
   --radius-xl: 2rem;     /* 32px */
   
-  /* Elevation/Shadow */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  /* Elevation/Shadow - ENHANCED */
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.03);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 10px 10px -5px rgba(0,0,0,0.04);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
   
-  /* Glass Effects */
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-backdrop: blur(16px);
+  /* Glass Effects - PREMIUM */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-backdrop: blur(20px);
   
   /* Standard Variables */
   --font-size: 14px;
@@ -166,40 +172,94 @@
   }
 }
 
-/* Glass Effect Utilities */
+/* Premium UI Utilities & Animations */
 @layer utilities {
   .glass-card {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
     border: 1px solid var(--glass-border);
     box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-xl);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-card:hover {
+    box-shadow: var(--shadow-xl), var(--shadow-glow);
+    transform: translateY(-2px);
+    border-color: rgba(16, 185, 129, 0.3);
   }
   
   .clay-button {
-    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    background: var(--gradient-primary);
     box-shadow: 
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      0 8px 16px -4px rgba(0, 0, 0, 0.1),
-      0 4px 8px -2px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 4px 6px rgba(16, 185, 129, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+    color: white;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .clay-button:hover {
     box-shadow: 
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      0 12px 20px -4px rgba(0, 0, 0, 0.15),
-      0 6px 12px -2px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 8px 15px rgba(16, 185, 129, 0.3),
+      0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px) scale(1.02);
+  }
+  
+  .clay-button:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
   }
   
   .crop-card-hover {
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .crop-card-hover:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-xl), 0 15px 30px rgba(0,0,0,0.1);
+  }
+
+  /* Custom Animations */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-stagger-1 { animation-delay: 100ms; }
+  .animate-stagger-2 { animation-delay: 200ms; }
+  .animate-stagger-3 { animation-delay: 300ms; }
+  .animate-stagger-4 { animation-delay: 400ms; }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 

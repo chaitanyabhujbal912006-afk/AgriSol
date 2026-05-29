@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
   Calendar, 
@@ -154,6 +154,20 @@ const recentActivity = [
 ];
 
 export function Dashboard({ onNavigate, userRole }: DashboardProps) {
+  const [userName, setUserName] = useState('Farmer');
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('agrisol_user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        const email = user.email || '';
+        const namePart = email.split('@')[0] || 'Farmer';
+        setUserName(namePart.charAt(0).toUpperCase() + namePart.slice(1));
+      } catch {}
+    }
+  }, []);
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800 border-red-200';
@@ -175,10 +189,10 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-            Welcome back, John! 🌾
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-foreground">
+            Welcome back, <span className="text-gradient">{userName}</span>! 🌾
           </h1>
           <p className="text-muted-foreground mt-1">
             Here's what's happening on your farm today
@@ -206,7 +220,7 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiCards.map((kpi, index) => (
-          <Card key={index} className="glass-card border-0 hover:shadow-lg transition-shadow">
+          <Card key={index} className="glass-card border-0 opacity-0 animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className={`p-2 rounded-lg bg-white/10 ${kpi.color}`}>
@@ -228,7 +242,7 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Tasks & Weather */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 opacity-0 animate-fade-in-up animate-stagger-2">
           {/* Weather Card */}
           <Card className="glass-card border-0">
             <CardHeader className="pb-4">
@@ -315,7 +329,7 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
         </div>
 
         {/* Right Column - Progress & Activity */}
-        <div className="space-y-6">
+        <div className="space-y-6 opacity-0 animate-fade-in-up animate-stagger-3">
           {/* Crop Progress */}
           <Card className="glass-card border-0">
             <CardHeader>

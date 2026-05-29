@@ -113,6 +113,16 @@ const regions = [
   'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal'
 ];
 
+interface BackendCrop {
+  name: string;
+  suitability: number;
+  expectedYield: string;
+  growthDuration: string;
+  waterDemand: string;
+  difficulty: string;
+  description: string;
+}
+
 export function CropRecommendation({ onNavigate, navigationData, userRole }: CropRecommendationProps) {
   const [formData, setFormData] = useState({
     nitrogen: [50],
@@ -127,6 +137,9 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
   
   const [showResults, setShowResults] = useState(false);
   const [selectedCrop, setSelectedCrop] = useState<string | null>(null);
+  const [backendCrops, setBackendCrops] = useState<BackendCrop[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({
@@ -135,9 +148,44 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowResults(true);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('agrisol_token');
+      const response = await fetch('http://localhost:5000/api/v1/crops/recommend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          nitrogen: formData.nitrogen[0],
+          phosphorus: formData.phosphorus[0],
+          potassium: formData.potassium[0],
+          pH: formData.ph || 6.5,
+          rainfall: formData.rainfall,
+          temperature: formData.temperature,
+          humidity: formData.humidity,
+          region: formData.region
+        })
+      });
+      const data = await response.json();
+      if (data.success && data.recommendations) {
+        setBackendCrops(data.recommendations);
+        setShowResults(true);
+      } else {
+        throw new Error(data.message || 'Failed to get recommendations');
+      }
+    } catch (err: any) {
+      // Fallback to frontend data if backend unavailable
+      setBackendCrops([]);
+      setShowResults(true);
+      setError(err.message?.includes('fetch') ? null : err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleReset = () => {
@@ -153,7 +201,26 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
     });
     setShowResults(false);
     setSelectedCrop(null);
+    setBackendCrops([]);
+    setError(null);
   };
+
+  // Use backend crops if available, else fall back to static demo data
+  const displayCrops = backendCrops.length > 0
+    ? backendCrops.map((c, i) => ({
+        id: c.name.toLowerCase().replace(/\s+/g, '-'),
+        name: c.name,
+        suitability: c.suitability,
+        expectedYield: c.expectedYield,
+        duration: c.growthDuration,
+        season: 'Kharif',
+        waterRequirement: c.waterDemand,
+        profitability: c.suitability >= 85 ? 'High' : 'Medium',
+        image: cropRecommendations[i % cropRecommendations.length]?.image || cropRecommendations[0].image,
+        description: c.description,
+        requirements: cropRecommendations[i % cropRecommendations.length]?.requirements || cropRecommendations[0].requirements
+      }))
+    : cropRecommendations;
 
   const getSuitabilityColor = (suitability: number) => {
     if (suitability >= 80) return 'text-green-600 bg-green-50';
@@ -335,13 +402,25 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
                 </Select>
               </div>
 
+              {error && (
+                <p className="text-sm text-red-500 bg-red-50 p-2 rounded-lg">{error}</p>
+              )}
               <Button
                 type="submit"
                 className="w-full clay-button bg-primary-green hover:bg-primary-green/90 text-white"
-                disabled={showResults}
+                disabled={showResults || isLoading}
               >
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Get Recommendations
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Get Recommendations
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
@@ -369,13 +448,13 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
                   <CardTitle className="flex items-center justify-between">
                     <span>Recommended Crops</span>
                     <Badge className="bg-primary-green text-white">
-                      {cropRecommendations.length} matches found
+                      {displayCrops.length} matches found
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {cropRecommendations.map((crop) => (
+                    {displayCrops.map((crop) => (
                       <Card
                         key={crop.id}
                         className={`cursor-pointer transition-all duration-200 hover:shadow-lg border ${
@@ -458,11 +537,11 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
               {selectedCrop && (
                 <Card className="glass-card border-0">
                   <CardHeader>
-                    <CardTitle>Detailed Analysis - {cropRecommendations.find(c => c.id === selectedCrop)?.name}</CardTitle>
+                    <CardTitle>Detailed Analysis - {displayCrops.find(c => c.id === selectedCrop)?.name}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {(() => {
-                      const crop = cropRecommendations.find(c => c.id === selectedCrop);
+                      const crop = displayCrops.find(c => c.id === selectedCrop);
                       if (!crop) return null;
                       
                       return (
@@ -560,7 +639,7 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  onClick={() => onNavigate('growth-calendar', { crops: cropRecommendations.slice(0, 2) })}
+                  onClick={() => onNavigate('growth-calendar', { crops: displayCrops.slice(0, 2) })}
                   className="clay-button bg-primary-green hover:bg-primary-green/90 text-white"
                 >
                   <Calendar className="w-4 h-4 mr-2" />
@@ -569,7 +648,7 @@ export function CropRecommendation({ onNavigate, navigationData, userRole }: Cro
                 
                 <Button
                   variant="outline"
-                  onClick={() => onNavigate('plant-explorer', { crop: selectedCrop || cropRecommendations[0].id })}
+                  onClick={() => onNavigate('plant-explorer', { crop: selectedCrop || displayCrops[0]?.id })}
                 >
                   Explore Plant Details
                   <ArrowRight className="w-4 h-4 ml-2" />

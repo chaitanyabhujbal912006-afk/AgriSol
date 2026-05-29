@@ -122,17 +122,17 @@ export function Landing({ onNavigate }: LandingProps) {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-6 text-center">
-          <div className="glass-card rounded-3xl p-8 lg:p-12 max-w-4xl mx-auto">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-6 text-center animate-fade-in-up">
+          <div className="glass-card p-8 lg:p-12 max-w-4xl mx-auto backdrop-blur-md">
             <div className="flex items-center justify-center mb-6">
-              <div className="w-16 h-16 bg-primary-green rounded-2xl flex items-center justify-center mb-4">
-                <Leaf className="w-8 h-8 text-white" />
+              <div className="w-20 h-20 bg-gradient-to-br from-primary-green to-primary-green-dark rounded-2xl flex items-center justify-center mb-4 shadow-lg animate-float">
+                <Sprout className="w-10 h-10 text-white" />
               </div>
             </div>
             
-            <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-5xl lg:text-7xl font-extrabold text-white mb-6 tracking-tight">
               Smart Farming with
-              <span className="text-harvest-yellow block lg:inline lg:ml-4">
+              <span className="text-harvest-yellow block lg:inline lg:ml-4 drop-shadow-md">
                 AI Intelligence
               </span>
             </h1>
@@ -145,17 +145,17 @@ export function Landing({ onNavigate }: LandingProps) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                className="clay-button bg-primary-green hover:bg-primary-green/90 text-white px-8 py-4 text-lg"
+                className="clay-button px-8 py-6 text-lg font-semibold shadow-xl"
                 onClick={() => onNavigate('auth')}
               >
                 Get Started
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-6 h-6 ml-2" />
               </Button>
               
               <Button 
                 size="lg" 
                 variant="outline"
-                className="clay-button bg-white/10 border-white/30 text-white hover:bg-white/20 px-8 py-4 text-lg"
+                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 px-8 py-6 text-lg font-semibold"
                 onClick={() => onNavigate('plant-explorer')}
               >
                 Explore Features
@@ -168,9 +168,9 @@ export function Landing({ onNavigate }: LandingProps) {
       {/* Crop Feature Tiles */}
       <section className="py-16 lg:py-24 bg-neutral-100">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Explore Crop Intelligence
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+              Explore <span className="text-gradient">Crop Intelligence</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Click on any crop to discover optimal growing conditions, disease management, 
@@ -178,11 +178,12 @@ export function Landing({ onNavigate }: LandingProps) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cropCards.map((crop) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {cropCards.map((crop, index) => (
               <Card 
                 key={crop.id}
-                className="crop-card-hover cursor-pointer border-0 shadow-lg overflow-hidden group"
+                className={`crop-card-hover cursor-pointer border-0 shadow-lg overflow-hidden group opacity-0 animate-fade-in-up`}
+                style={{ animationDelay: `${index * 100}ms` }}
                 onClick={() => onNavigate('plant-explorer', { crop: crop.id })}
               >
                 <div className="relative h-48 overflow-hidden">
@@ -219,11 +220,11 @@ export function Landing({ onNavigate }: LandingProps) {
       </section>
 
       {/* Quick Links Section */}
-      <section className="py-16 lg:py-24">
+      <section className="py-16 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
-              Quick Access Tools
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-4">
+              Quick Access <span className="text-gradient">Tools</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Jump straight into the core features that will transform your farming experience.
@@ -231,13 +232,14 @@ export function Landing({ onNavigate }: LandingProps) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {quickLinks.map((link) => (
+            {quickLinks.map((link, index) => (
               <Card 
                 key={link.id}
-                className="clay-button cursor-pointer border-0 hover:shadow-xl transition-all duration-200 group"
+                className={`clay-button cursor-pointer border-0 transition-all duration-300 group opacity-0 animate-fade-in-up`}
+                style={{ animationDelay: `${index * 100}ms` }}
                 onClick={() => onNavigate(link.id)}
               >
-                <CardContent className="p-6 text-center">
+                <CardContent className="p-6 text-center h-full flex flex-col items-center justify-center">
                   <div className={`w-12 h-12 ${link.color} rounded-xl flex items-center justify-center mx-auto mb-4 text-white group-hover:scale-110 transition-transform`}>
                     {link.icon}
                   </div>

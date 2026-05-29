@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
   Search, 
   Filter, 
@@ -188,12 +188,54 @@ const diseaseTypes = ['All', 'Fungal Disease', 'Bacterial Disease', 'Viral Disea
 const severityLevels = ['All', 'Low', 'Medium', 'High'];
 const affectedCrops = ['All', 'Rice', 'Wheat', 'Tomato', 'Potato', 'Cotton', 'Sugarcane'];
 
+interface DiagnosisResult {
+  diagnosedDisease: string;
+  confidence: number;
+  cause: string;
+  symptoms: string[];
+  treatments: { organic: string; chemical: string };
+  imageUrl: string;
+}
+
 export function DiseaseLibrary({ onNavigate, navigationData, userRole }: DiseaseLibraryProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('All');
   const [selectedSeverity, setSelectedSeverity] = useState('All');
   const [selectedCrop, setSelectedCrop] = useState('All');
   const [selectedDisease, setSelectedDisease] = useState<string | null>(navigationData?.disease || null);
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
+  const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
+  const [diagnosisError, setDiagnosisError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDiagnoseImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsDiagnosing(true);
+    setDiagnosisError(null);
+    setDiagnosisResult(null);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const token = localStorage.getItem('agrisol_token');
+      const res = await fetch('http://localhost:5000/api/v1/diseases/diagnose', {
+        method: 'POST',
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.diagnosis) {
+        setDiagnosisResult(data.diagnosis);
+      } else {
+        throw new Error(data.message || 'Diagnosis failed');
+      }
+    } catch (err: any) {
+      setDiagnosisError(err.message?.includes('fetch') ? 'Backend server is offline. Please start the backend server.' : err.message);
+    } finally {
+      setIsDiagnosing(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const filteredDiseases = useMemo(() => {
     return diseaseDatabase.filter(disease => {
@@ -237,12 +279,53 @@ export function DiseaseLibrary({ onNavigate, navigationData, userRole }: Disease
           </p>
         </div>
         
-        <Alert className="lg:max-w-md border-blue-200 bg-blue-50">
-          <Camera className="w-4 h-4" />
-          <AlertDescription className="text-blue-800">
-            <strong>Coming Soon:</strong> AI-powered disease identification through image upload
-          </AlertDescription>
-        </Alert>
+        <div className="lg:max-w-md space-y-3">
+          <Alert className="border-blue-200 bg-blue-50">
+            <Camera className="w-4 h-4" />
+            <AlertDescription className="text-blue-800">
+              <strong>AI Diagnose:</strong> Upload a leaf photo for instant disease identification
+            </AlertDescription>
+          </Alert>
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="disease-image-upload"
+              onChange={handleDiagnoseImage}
+            />
+            <Button
+              asChild
+              className="bg-primary-green hover:bg-primary-green/90 text-white w-full"
+              disabled={isDiagnosing}
+            >
+              <label htmlFor="disease-image-upload" className="cursor-pointer flex items-center justify-center gap-2">
+                {isDiagnosing ? (
+                  <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Diagnosing...</>
+                ) : (
+                  <><Camera className="w-4 h-4" /> Upload Leaf Photo</>
+                )}
+              </label>
+            </Button>
+          </div>
+          {diagnosisError && (
+            <p className="text-xs text-red-600 bg-red-50 p-2 rounded">{diagnosisError}</p>
+          )}
+          {diagnosisResult && (
+            <div className="bg-white border border-green-200 rounded-lg p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm text-green-800">{diagnosisResult.diagnosedDisease}</p>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">{diagnosisResult.confidence}% confidence</span>
+              </div>
+              <p className="text-xs text-muted-foreground"><span className="font-medium">Cause:</span> {diagnosisResult.cause}</p>
+              <div>
+                <p className="text-xs font-medium mb-1">Organic treatment:</p>
+                <p className="text-xs text-muted-foreground">{diagnosisResult.treatments.organic}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
