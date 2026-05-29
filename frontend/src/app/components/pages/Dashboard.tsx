@@ -15,7 +15,9 @@ import {
   ArrowRight,
   Sprout,
   Sun,
-  Cloud
+  Cloud,
+  MessageSquare,
+  TestTube
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -191,18 +193,18 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
       {/* Welcome Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-foreground">
-            Welcome back, <span className="text-gradient">{userName}</span>! 🌾
+          <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Welcome back, <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">{userName}</span>! 🌾
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Here's what's happening on your farm today
+          <p className="text-slate-500 dark:text-neutral-400 text-sm mt-1">
+            Precision farming telemetry logs are online. Here is your farm's state today.
           </p>
         </div>
         
         <div className="flex items-center gap-3">
           <Button
             onClick={() => onNavigate('crop-recommendation')}
-            className="bg-primary-green hover:bg-primary-green/90 text-white"
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-md shadow-emerald-500/10 rounded-xl px-5 h-11 font-semibold text-sm"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Recommendation
@@ -210,8 +212,9 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
           <Button
             variant="outline"
             onClick={() => onNavigate('reports')}
+            className="rounded-xl border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-200 h-11 text-sm font-semibold hover:bg-slate-100/50 dark:hover:bg-neutral-900/40"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 mr-2 text-slate-400" />
             Export Report
           </Button>
         </div>
@@ -220,19 +223,19 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiCards.map((kpi, index) => (
-          <Card key={index} className="glass-card border-0 opacity-0 animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+          <Card key={index} className="glass-card-premium border-0 opacity-0 animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
-                <div className={`p-2 rounded-lg bg-white/10 ${kpi.color}`}>
+                <div className={`p-2.5 rounded-xl bg-slate-100 dark:bg-neutral-800/80 ${kpi.color}`}>
                   {kpi.icon}
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
-                  <p className="text-xs text-muted-foreground">{kpi.change}</p>
+                  <p className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">{kpi.value}</p>
+                  <p className="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400">{kpi.change}</p>
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-sm font-medium text-foreground">{kpi.title}</p>
+                <p className="text-sm font-bold text-slate-500 dark:text-neutral-400">{kpi.title}</p>
               </div>
             </CardContent>
           </Card>
@@ -243,12 +246,13 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Tasks & Weather */}
         <div className="lg:col-span-2 space-y-6 opacity-0 animate-fade-in-up animate-stagger-2">
+          
           {/* Weather Card */}
-          <Card className="glass-card border-0">
+          <Card className="glass-card-premium border-0 overflow-hidden relative bg-gradient-to-br from-blue-500/10 via-amber-500/5 to-emerald-500/5 dark:from-neutral-900/60 dark:via-blue-900/10 dark:to-neutral-900/30">
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Thermometer className="w-5 h-5" />
-                Weather Overview
+              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-lg">
+                <Thermometer className="w-5 h-5 text-amber-500" />
+                Weather & Sensor Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -256,19 +260,19 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
                 <div className="flex items-center gap-4">
                   {weatherData.current.icon}
                   <div>
-                    <p className="text-2xl font-bold text-foreground">{weatherData.current.temp}</p>
-                    <p className="text-sm text-muted-foreground">{weatherData.current.condition}</p>
+                    <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">{weatherData.current.temp}</p>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-neutral-400">{weatherData.current.condition}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="flex items-center gap-1">
-                      <Droplets className="w-4 h-4 text-blue-500" />
-                      <span>{weatherData.current.humidity}</span>
+                  <div className="flex items-center gap-4 text-xs font-semibold text-slate-600 dark:text-neutral-300">
+                    <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-950/20 px-2.5 py-1.5 rounded-lg">
+                      <Droplets className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
+                      <span>{weatherData.current.humidity} Hum</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Cloud className="w-4 h-4 text-gray-500" />
-                      <span>{weatherData.current.rainfall}</span>
+                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-neutral-800/60 px-2.5 py-1.5 rounded-lg">
+                      <Cloud className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{weatherData.current.rainfall} Rain</span>
                     </div>
                   </div>
                 </div>
@@ -276,13 +280,13 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
 
               <div className="grid grid-cols-4 gap-3">
                 {weatherData.forecast.map((day) => (
-                  <div key={day.day} className="text-center p-3 rounded-lg bg-white/5">
-                    <p className="text-xs font-medium text-muted-foreground mb-2">{day.day}</p>
-                    <div className="flex justify-center mb-2 text-muted-foreground">
+                  <div key={day.day} className="text-center p-3 rounded-xl bg-white/40 dark:bg-neutral-900/40 border border-slate-200/30 dark:border-neutral-800/30 shadow-sm">
+                    <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mb-2">{day.day}</p>
+                    <div className="flex justify-center mb-2 text-slate-500 dark:text-neutral-300">
                       {day.icon}
                     </div>
-                    <p className="text-sm font-semibold text-foreground">{day.high}</p>
-                    <p className="text-xs text-muted-foreground">{day.low}</p>
+                    <p className="text-sm font-extrabold text-slate-800 dark:text-white">{day.high}</p>
+                    <p className="text-[10px] font-semibold text-slate-400 dark:text-neutral-500">{day.low}</p>
                   </div>
                 ))}
               </div>
@@ -290,37 +294,46 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
           </Card>
 
           {/* Upcoming Tasks */}
-          <Card className="glass-card border-0">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Calendar className="w-5 h-5" />
-                Upcoming Tasks
+          <Card className="glass-card-premium border-0">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-lg">
+                <Calendar className="w-5 h-5 text-emerald-500" />
+                Growth Task Schedule
               </CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onNavigate('growth-calendar')}
-                className="text-primary-green hover:text-primary-green/80"
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg"
               >
-                View All
+                View Calendar
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {upcomingTasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-4 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-white/40 dark:bg-neutral-900/40 border border-slate-200/20 dark:border-neutral-800/20 hover:border-emerald-500/25 hover:shadow-md transition-all duration-300">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-foreground">{task.task}</h4>
-                      <Badge className={`text-xs ${getPriorityColor(task.priority)}`}>
+                      <span className={`w-2 h-2 rounded-full animate-pulse ${
+                        task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`} />
+                      <h4 className="font-bold text-sm text-slate-800 dark:text-white">{task.task}</h4>
+                      <Badge className={`text-[9px] font-extrabold tracking-wider px-2 py-0.5 border rounded-full ${
+                        task.priority === 'high' ? 'bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border-red-200/40' :
+                        task.priority === 'medium' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/40' :
+                        'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-200/40'
+                      }`}>
                         {task.priority}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">{task.date}</p>
-                    <p className="text-xs text-muted-foreground">Crop: {task.crop}</p>
+                    <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-neutral-500 mt-1.5 font-medium">
+                      <span>Due: {task.date}</span>
+                      <span>Crop Target: <strong className="text-slate-500 dark:text-neutral-400">{task.crop}</strong></span>
+                    </div>
                   </div>
-                  <Button size="sm" variant="ghost" className="text-primary-green">
-                    <CheckCircle className="w-4 h-4" />
+                  <Button size="sm" variant="ghost" className="text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-neutral-800 rounded-lg">
+                    <CheckCircle className="w-5 h-5" />
                   </Button>
                 </div>
               ))}
@@ -331,46 +344,48 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
         {/* Right Column - Progress & Activity */}
         <div className="space-y-6 opacity-0 animate-fade-in-up animate-stagger-3">
           {/* Crop Progress */}
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <BarChart3 className="w-5 h-5" />
-                Crop Progress
+          <Card className="glass-card-premium border-0">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-lg">
+                <BarChart3 className="w-5 h-5 text-emerald-500" />
+                Active Crop Development
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4.5">
               {cropProgress.map((crop) => (
                 <div key={crop.name} className="space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between text-sm">
                     <div>
-                      <p className="font-medium text-foreground">{crop.name}</p>
-                      <p className="text-xs text-muted-foreground">{crop.stage} • {crop.acres} acres</p>
+                      <p className="font-bold text-slate-800 dark:text-white">{crop.name}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold">{crop.stage} • {crop.acres} acres</p>
                     </div>
-                    <Badge className={`text-xs ${getStatusColor(crop.status)} bg-transparent border-current`}>
+                    <Badge className={`text-[10px] font-extrabold uppercase bg-transparent border border-current px-2.5 rounded-full ${getStatusColor(crop.status)}`}>
                       {crop.status}
                     </Badge>
                   </div>
-                  <Progress value={crop.progress} className="h-2" />
-                  <p className="text-xs text-muted-foreground text-right">{crop.progress}% Complete</p>
+                  <div className="relative pt-1">
+                    <Progress value={crop.progress} className="h-2 bg-slate-100 dark:bg-neutral-800" />
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-500 dark:text-neutral-400 text-right">{crop.progress}% complete</p>
                 </div>
               ))}
             </CardContent>
           </Card>
 
           {/* Recent Activity */}
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle className="text-foreground">Recent Activity</CardTitle>
+          <Card className="glass-card-premium border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-slate-800 dark:text-white font-bold text-lg">Telemetry Logs</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3.5">
               {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                  <div className="mt-1">
+                <div key={activity.id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-neutral-800/40 transition-colors">
+                  <div className="mt-0.5 p-1 rounded-lg bg-slate-100 dark:bg-neutral-800">
                     {activity.icon}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    <p className="text-xs font-bold text-slate-700 dark:text-neutral-200">{activity.action}</p>
+                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{activity.time}</p>
                   </div>
                 </div>
               ))}
@@ -378,42 +393,42 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
           </Card>
 
           {/* Quick Actions */}
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle className="text-foreground">Quick Actions</CardTitle>
+          <Card className="glass-card-premium border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-slate-800 dark:text-white font-bold text-lg">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start h-12 text-sm font-semibold rounded-xl border border-slate-200/60 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-900/60"
                 onClick={() => onNavigate('soil-prediction')}
               >
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                  <div className="w-4 h-4 bg-blue-500 rounded" />
+                <div className="w-7 h-7 bg-blue-50 dark:bg-blue-950/20 rounded-lg flex items-center justify-center mr-3 text-blue-500">
+                  <TestTube className="w-4 h-4" />
                 </div>
-                Test Soil Quality
+                Scan Soil Chemistry
               </Button>
               
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start h-12 text-sm font-semibold rounded-xl border border-slate-200/60 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-900/60"
                 onClick={() => onNavigate('plant-explorer')}
               >
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                  <Sprout className="w-4 h-4 text-green-500" />
+                <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg flex items-center justify-center mr-3 text-emerald-500">
+                  <Sprout className="w-4 h-4" />
                 </div>
-                Explore Plants
+                Explore Crop Types
               </Button>
               
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start h-12 text-sm font-semibold rounded-xl border border-slate-200/60 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-900/60"
                 onClick={() => onNavigate('chatbot')}
               >
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                  <div className="w-4 h-4 bg-orange-500 rounded-full" />
+                <div className="w-7 h-7 bg-amber-50 dark:bg-amber-950/20 rounded-lg flex items-center justify-center mr-3 text-amber-500">
+                  <MessageSquare className="w-4 h-4" />
                 </div>
-                Ask Farm Advisor
+                Consult Farm AI Chat
               </Button>
             </CardContent>
           </Card>

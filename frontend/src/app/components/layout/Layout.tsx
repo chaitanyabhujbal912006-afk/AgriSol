@@ -75,33 +75,33 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50 dark:bg-neutral-950">
       {/* Desktop Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-white/80 backdrop-blur-xl border-r border-border
-        transform transition-transform duration-300 ease-in-out shadow-lg
+        fixed top-0 left-0 z-50 h-full w-64 bg-white/70 dark:bg-neutral-900/60 backdrop-blur-xl border-r border-slate-200/40 dark:border-neutral-800/40
+        transform transition-transform duration-300 ease-in-out shadow-xl shadow-slate-100/50 dark:shadow-none
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200/40 dark:border-neutral-800/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-green to-primary-green-dark rounded-xl flex items-center justify-center shadow-md">
-              <Sprout className="w-6 h-6 text-white" />
+            <div className="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/10">
+              <Sprout className="w-5 h-5 text-white" />
             </div>
-            <span className="font-extrabold text-xl text-transparent bg-clip-text bg-gradient-to-r from-primary-green to-primary-green-dark">
-              FarmerAI
+            <span className="font-extrabold text-lg tracking-tight text-slate-800 dark:text-white">
+              Farmer<span className="text-emerald-500">AI</span>
             </span>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="lg:hidden"
+            className="lg:hidden text-slate-500 hover:bg-slate-100"
             onClick={toggleSidebar}
           >
             <X className="w-4 h-4" />
           </Button>
         </div>
         
-        <nav className="p-4 space-y-2">
+        <nav className="p-4 space-y-1.5">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -112,14 +112,14 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
                 onClick={() => onNavigate && onNavigate(item.id)}
                 className={`
                   w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left
-                  transition-all duration-300 font-medium
+                  transition-all duration-200 font-semibold text-sm
                   ${isActive 
-                    ? 'bg-gradient-to-r from-primary-green/90 to-primary-green text-white shadow-md transform scale-[1.02]' 
-                    : 'text-muted-foreground hover:bg-neutral-100 hover:text-foreground'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/10 transform scale-[1.01]' 
+                    : 'text-slate-600 dark:text-neutral-400 hover:bg-slate-100/50 dark:hover:bg-neutral-800/40 hover:text-emerald-500 dark:hover:text-emerald-400'
                   }
                 `}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-emerald-500'}`} />
                 <span>{item.label}</span>
               </button>
             );
@@ -130,24 +130,24 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
       {/* Main Content */}
       <div className="lg:ml-64">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-border px-4 lg:px-6 py-4 shadow-sm">
+        <header className="sticky top-0 z-30 bg-white/60 dark:bg-neutral-950/60 backdrop-blur-md border-b border-slate-200/40 dark:border-neutral-800/40 px-4 lg:px-6 py-4 shadow-sm">
           <div className="flex items-center justify-between">
             {/* Left Side */}
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
-                className="lg:hidden"
+                className="lg:hidden text-slate-600 dark:text-neutral-300"
                 onClick={toggleSidebar}
               >
                 <Menu className="w-5 h-5" />
               </Button>
               
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="relative max-w-md hidden sm:block">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
-                  placeholder="Search crops, diseases, tutorials..."
-                  className="pl-10 bg-input-background border-0 focus:ring-2 focus:ring-ring"
+                  placeholder="Search diagnostics, crops..."
+                  className="pl-9 h-9 w-[260px] bg-slate-100/50 dark:bg-neutral-900/60 border border-slate-200/40 dark:border-neutral-800/40 focus-visible:ring-1 focus-visible:ring-emerald-500/30 rounded-xl text-sm"
                 />
               </div>
             </div>
@@ -155,26 +155,26 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
             {/* Right Side */}
             <div className="flex items-center gap-4">
               {/* Language Switcher */}
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Globe className="w-4 h-4" />
-                <span className="hidden sm:inline">{language}</span>
+              <Button variant="ghost" size="sm" className="gap-2 text-slate-600 dark:text-neutral-300">
+                <Globe className="w-4 h-4 text-slate-400" />
+                <span className="hidden sm:inline font-semibold text-xs">{language}</span>
               </Button>
 
               {/* Notifications */}
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                <Badge className="absolute -top-1 -right-1 w-2 h-2 p-0 bg-danger-red" />
+              <Button variant="ghost" size="sm" className="relative text-slate-600 dark:text-neutral-300">
+                <Bell className="w-4.5 h-4.5 text-slate-400" />
+                <Badge className="absolute top-1.5 right-1.5 w-1.5 h-1.5 p-0 bg-red-500 border border-white dark:border-neutral-950 rounded-full" />
               </Button>
 
               {/* User Menu */}
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block text-right">
-                  <p className="text-sm font-medium">{userDisplay.name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{userDisplay.role}</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight">{userDisplay.name}</p>
+                  <p className="text-[10px] text-slate-400 capitalize">{userDisplay.role}</p>
                 </div>
-                <Avatar className="w-8 h-8">
+                <Avatar className="w-8 h-8 ring-2 ring-emerald-500/10">
                   <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary-green text-white">{userDisplay.initials}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs">{userDisplay.initials}</AvatarFallback>
                 </Avatar>
               </div>
             </div>
@@ -182,13 +182,13 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
         </header>
 
         {/* Page Content */}
-        <main className="p-4 lg:p-6 pb-20 lg:pb-6">
+        <main className="p-6 pb-24 lg:pb-6">
           {children}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-border z-40">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md border-t border-slate-200/50 dark:border-neutral-800/50 z-40">
         <div className="flex items-center justify-around py-2">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
@@ -199,13 +199,13 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
                 key={item.id}
                 onClick={() => onNavigate && onNavigate(item.id)}
                 className={`
-                  flex flex-col items-center gap-1 px-3 py-2 rounded-lg
+                  flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg
                   transition-colors duration-200
-                  ${isActive ? 'text-primary-green' : 'text-muted-foreground'}
+                  ${isActive ? 'text-emerald-500 font-semibold' : 'text-slate-500 dark:text-neutral-400'}
                 `}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <Icon className="w-4.5 h-4.5" />
+                <span className="text-[10px]">{item.label}</span>
               </button>
             );
           })}
@@ -215,7 +215,7 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
       {/* Sidebar Overlay */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           onClick={toggleSidebar}
         />
       )}

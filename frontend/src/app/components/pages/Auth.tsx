@@ -176,8 +176,33 @@ export function Auth({ onNavigate }: AuthProps) {
     setAuthStep('details');
   };
 
-  const handleDetailsSubmission = () => {
-    setAuthStep('success');
+  const handleDetailsSubmission = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('agrisol_token');
+      const response = await fetch(`${API}/farmers/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          state: formData.state,
+          preferredLanguage: selectedLanguage,
+          landSize: formData.landSize ? { value: parseFloat(formData.landSize), unit: 'acres' } : undefined,
+          farmingType: formData.farmType
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        localStorage.setItem('agrisol_user', JSON.stringify(data.data));
+      }
+    } catch (err) {
+      console.error('Details submission error:', err);
+    } finally {
+      setIsLoading(false);
+      setAuthStep('success');
+    }
   };
 
   const handleSuccess = () => {
@@ -193,24 +218,24 @@ export function Auth({ onNavigate }: AuthProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
         <ImageWithFallback
           src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1920&h=1080&fit=crop"
           alt="Agricultural field"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-green/20 via-black/40 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-slate-950/60 to-slate-950/80" />
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-4">
-        <Card className="glass-card border-0 shadow-2xl">
+        <Card className="glass-card-premium border-0 shadow-2xl bg-slate-900/70 backdrop-blur-2xl text-white">
           <CardHeader className="text-center pb-6">
-            <div className="w-16 h-16 bg-primary-green rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/15">
               <Sprout className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-white">FarmerAI</CardTitle>
+            <CardTitle className="text-2xl font-extrabold text-white tracking-tight">Farmer<span className="text-emerald-400">AI</span></CardTitle>
           </CardHeader>
 
           <CardContent className="p-6">
@@ -548,7 +573,14 @@ export function Auth({ onNavigate }: AuthProps) {
 
                 <RadioGroup value={selectedRole} onValueChange={setSelectedRole}>
                   <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-white/20 hover:bg-white/5 cursor-pointer">
+                    <div 
+                      onClick={() => setSelectedRole('farmer')}
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-colors cursor-pointer ${
+                        selectedRole === 'farmer'
+                          ? 'border-primary-green bg-primary-green/20'
+                          : 'border-white/20 hover:bg-white/5'
+                      }`}
+                    >
                       <RadioGroupItem value="farmer" id="farmer" />
                       <div className="flex items-center space-x-3">
                         <User className="w-8 h-8 text-harvest-yellow" />
@@ -563,7 +595,14 @@ export function Auth({ onNavigate }: AuthProps) {
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-3 p-4 rounded-lg border border-white/20 hover:bg-white/5 cursor-pointer">
+                    <div 
+                      onClick={() => setSelectedRole('admin')}
+                      className={`flex items-center space-x-3 p-4 rounded-lg border transition-colors cursor-pointer ${
+                        selectedRole === 'admin'
+                          ? 'border-primary-green bg-primary-green/20'
+                          : 'border-white/20 hover:bg-white/5'
+                      }`}
+                    >
                       <RadioGroupItem value="admin" id="admin" />
                       <div className="flex items-center space-x-3">
                         <Shield className="w-8 h-8 text-primary-green" />
