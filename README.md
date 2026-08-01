@@ -1,141 +1,143 @@
-# 🌾 AgriSol: AI-Powered Agricultural Platform
+# 🌾 AgriSol: Smart Agriculture Platform
 
-AgriSol is a comprehensive digital agriculture ecosystem designed to support farmers and agronomists with AI-driven insights, soil analysis, crop recommendations, disease diagnosis, and smart growth calendars. 
+AgriSol is an enterprise-grade digital agriculture ecosystem empowering farmers, agronomists, and agricultural researchers with AI-driven soil diagnostics, computer-vision leaf disease analysis, crop yield predictors, market price intelligence, government schemes, growth calendar task schedulers, and real-time IoT telemetry.
 
 ---
 
-## 📁 Project Folder Structure
+## 🎨 UI Aesthetics & iPhone AgTech Design System
 
-This workspace is organized as a clean, modular full-stack application. It is fully custom-coded, typesafe, and uses local SQLite databases to guarantee instant out-of-the-box operations.
+AgriSol features a state-of-the-art **iOS AgTech Glassmorphic Design System**:
+- **Dynamic Island Telemetry Banner**: Real-time top bar displaying live soil moisture (68%), air temperature (28°C), and AI diagnostic model health.
+- **iPhone Glass Pill Bottom Navigation Dock**: Floating frosted glass bottom navigation bar with glowing emerald indicators, spring active tabs, and responsive layout.
+- **iPhone 16 Pro Max Preview Frame Mode**: Header button allowing users to view the entire platform inside a glassmorphic iPhone container complete with camera cutout, volume buttons, side key accents, and home indicator.
+- **Botanical Palette**: Deep Forest Emerald (`#059669`), Vibrant Leaf Green (`#22c55e`), Sun-drenched Harvest Amber (`#f59e0b`), and Earthy Soil Tones with dark/light mode support.
+
+---
+
+## 📁 Project Workspace Structure
 
 ```
 AgriSol/
-├── backend/                   # 🔌 Node.js + Express + TypeScript Backend
-│   ├── prisma/                # Database Migrations & Prisma SQLite Schema
-│   │   └── schema.prisma
+├── backend1/                  # 🔌 Production Node.js + Express API Backend (Primary)
 │   ├── src/
-│   │   ├── config/            # DB client configurations & Mailer setup
-│   │   ├── controllers/       # Business logic (Auth, Soil, Crops, Chatbot, Calendar)
-│   │   ├── middleware/        # JWT Authentication & File upload helpers
-│   │   ├── routes/            # Express routers
-│   │   ├── utils/             # Helper utilities (OTP generation/validation)
-│   │   └── index.ts           # Backend startup script
-│   ├── .env                   # Local backend settings & Mail credentials
-│   ├── package.json           # Backend dependency list
-│   └── tsconfig.json          # TypeScript server compiler options
-├── frontend/                  # 💻 React + Vite + Tailwind CSS 4 Frontend Folder
+│   │   ├── config/            # Database (MongoDB), Redis, and Swagger configurations
+│   │   ├── controllers/       # Auth, Soil, Disease, Weather, Market, Community, Calendar
+│   │   ├── middleware/        # JWT Protect, Rate Limiting, Mongo Sanitize, Error Handlers
+│   │   ├── models/            # Mongoose Schemas (User, Farm, DiseaseReport, MarketPrice, etc.)
+│   │   ├── routes/v1/         # Versioned Express routes (/api/v1/*)
+│   │   ├── services/          # Cloudinary uploads, Nodemailer, Twilio SMS
+│   │   ├── sockets/           # Real-time Socket.IO notification system
+│   │   └── app.js             # Main server entry point
+│   ├── tests/                 # 🧪 Automated Jest Integration Test Suite
+│   ├── scripts/               # 🌾 Seeders (`seed.js`) & Migration scripts
+│   ├── locales/               # Multilingual i18n translations (English, Hindi, Marathi)
+│   └── package.json           # Server dependencies & scripts
+├── frontend/                  # 💻 React 18 + Vite 6 + Tailwind CSS 4 Web App
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/
-│   │   │   │   ├── layout/    # Dynamic sidebar and dashboard wraps
-│   │   │   │   ├── pages/     # 13 Core pages (Dashboard, Prediction, Chatbot, Auth, etc.)
-│   │   │   │   ├── shared/    # Shared components (Image handlers)
-│   │   │   │   └── ui/        # Customized Radix UI & Shadcn components
-│   │   │   ├── data/          # Media datasets & constant values
-│   │   │   └── App.tsx        # Main router & state orchestrator
-│   │   ├── styles/            # Tailwind CSS 4 setup and global variables
-│   │   │   ├── default_theme.css
-│   │   │   ├── globals.css
-│   │   │   └── index.css
-│   │   └── main.tsx           # Client entry point
-│   ├── package.json           # Frontend dependency list
-│   └── vite.config.ts         # Vite configurations
-└── backend1/                  # ⚠️ Deprecated / Backup JavaScript Backend
+│   │   │   │   ├── layout/    # iPhone AgTech Layout with Dynamic Island & Glass Dock
+│   │   │   │   ├── pages/     # 13 Core Pages (Dashboard, Soil, Disease, Calendar, etc.)
+│   │   │   │   └── ui/        # Custom Radix UI & Shadcn components
+│   │   │   └── App.tsx        # Application state & router
+│   │   └── main.tsx           # Entry point
+│   └── package.json
+└── backend/                   # 🔌 TypeScript + Prisma SQLite Microservice Backend
 ```
 
 ---
 
-## 🛠️ Full-Stack Technology Stack
+## 🛠️ Full Technology Stack
 
 ### 💻 Client (Frontend)
-* **Framework**: React 18 (TypeScript)
-* **Build System**: Vite 6
-* **Styling**: Tailwind CSS 4 (using curated CSS HSL theme tokens)
-* **UI Elements**: Radix UI + Lucide Icons + Recharts (for dynamic analytics)
+- **Framework**: React 18 (TypeScript)
+- **Build Tool**: Vite 6
+- **Styling**: Tailwind CSS 4 + Custom Glassmorphism design tokens
+- **UI Components**: Radix UI + Lucide Icons + Recharts Telemetry Charts + Framer Motion animations
 
-### 🔌 Server (Backend)
-* **Runtime & Framework**: Node.js + Express + TypeScript
-* **Database**: Local SQLite (zero-config, self-contained SQL file)
-* **ORM**: Prisma (highly modern, typesafe database queries)
-* **Security & Auth**: JSON Web Tokens (JWT) + `bcryptjs` (password hashing) + OTP (Email verification flow)
-* **Mail Server**: Nodemailer (sends OTP verification emails)
-* **File Uploads**: `multer` (stores crop/soil images securely)
-
----
-
-## 🔒 Email OTP Verification Setup
-
-To ensure secure signup and account verification, AgriSol utilizes an email-based One-Time Password (OTP) verification flow. 
-
-### Configuration Steps:
-1. Open the backend configuration file `backend/.env`.
-2. Fill in the following variables with your Gmail credentials (or any SMTP server setup):
-   ```env
-   EMAIL_USER=your_gmail@gmail.com
-   EMAIL_PASS=your_gmail_app_password   # NOT your main Google account password
-   EMAIL_FROM="AgriSol <your_gmail@gmail.com>"
-   ```
-3. **How to generate a Gmail App Password:**
-   * Enable **2-Factor Authentication (2FA)** on your Google account.
-   * Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
-   * Select **Mail** → Generate.
-   * Copy the 16-character password generated and paste it as `EMAIL_PASS`.
+### 🔌 Server (Backend `backend1`)
+- **Runtime**: Node.js 18+ & Express.js
+- **Database**: MongoDB (Mongoose 8) with indexed geospatial & telemetry models
+- **Testing**: Jest 29 + Supertest integration test suite
+- **Authentication**: JWT + bcryptjs + OTP SMS/Email fallback
+- **Real-time Engine**: Socket.IO
+- **API Documentation**: Swagger UI (`/api-docs`)
+- **Security**: Helmet, Rate Limiting, Mongo Sanitize, HPP CORS headers
+- **Caching & Queues**: Redis & Bull Queue
 
 ---
 
 ## 🚀 Quick Start Guide
 
-Follow these steps to run both the frontend and backend servers on your local computer.
+### 1. Running the Primary Backend (`backend1`)
 
-### 🔌 Running the Backend
-1. Open your terminal and navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
-2. Install all development and server dependencies:
-   ```bash
-   npm install --legacy-peer-deps
-   ```
-3. Initialize the database and run migration routines:
-   ```bash
-   npx prisma migrate dev --name init
-   ```
-4. Start the backend development server:
-   ```bash
-   npm run dev
-   ```
-   *The backend will boot up and be live on **`http://localhost:5000`**.*
+```bash
+cd backend1
 
-### 💻 Running the Frontend
-1. Open a new terminal and navigate to the frontend folder:
-   ```bash
-   cd frontend
-   ```
-2. Install all client dependencies:
-   ```bash
-   npm install --legacy-peer-deps
-   ```
-3. Launch the development server:
-   ```bash
-   npm run dev
-   ```
-   *The frontend website will open instantly at **`http://localhost:5173`**.*
+# Install dependencies
+npm install
+
+# Run database seeder (seeds demo farmers, market prices, schemes, community posts)
+npm run seed
+
+# Run automated test suite (Jest)
+npm test
+
+# Start backend server
+npm run dev
+```
+
+*The backend server runs on **`http://localhost:5000`** with interactive API docs at **`http://localhost:5000/api-docs`**.*
+
+### 2. Running the Frontend (`frontend`)
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+*The frontend opens at **`http://localhost:5173`**.*
 
 ---
 
-## 🔌 API Route Map Reference
+## 🧪 Automated Testing Suite
 
-| Endpoints Namespace | HTTP Method | Protected | Description |
+The primary backend comes with a complete **Jest + Supertest integration test suite**:
+
+```bash
+cd backend1
+npm test
+```
+
+### Test Coverage Highlights:
+- `tests/health.test.js` — Health check `/health`, welcome route `/`, and API `/api/v1` route mapping verification.
+- `tests/soil.test.js` — Soil analysis submission, classification, and history logs.
+- `tests/disease.test.js` — AI disease report upload and outbreak analytics fallback.
+- `tests/calendar.test.js` — Growth calendar event creation, listing, and task toggles.
+
+---
+
+## 🔌 API Route Map (`/api/v1`)
+
+| Namespace | Method | Access | Description |
 |---|---|---|---|
-| `/api/v1/auth/signup` | `POST` | No | Registers user, hashes password, generates OTP & sends validation email |
-| `/api/v1/auth/signin` | `POST` | No | Authenticates user credentials. Resends OTP if account is unverified |
-| `/api/v1/auth/verify-otp` | `POST` | No | Verifies 6-digit OTP code against expiry and issues user session JWT |
-| `/api/v1/auth/resend-otp` | `POST` | No | Cooldown-protected route to refresh and resend verification code |
-| `/api/v1/soil/analyze` | `POST` | Yes | Uploads soil photos (multipart/form-data) for classification |
-| `/api/v1/soil/history` | `GET` | Yes | Retrieves user's soil analysis history logs |
-| `/api/v1/crops/recommend` | `POST` | Yes | Computes optimal crops from soil nutrient factors (N, P, K, pH, rainfall, temperature, humidity) |
-| `/api/v1/diseases/diagnose` | `POST` | Yes | Uploads plant leaf photos (multipart/form-data) to diagnose infections |
-| `/api/v1/calendar/events` | `GET` | Yes | Retrieves current user's growth calendar and task events |
-| `/api/v1/calendar/events` | `POST` | Yes | Creates new planting schedule appointment / task event |
-| `/api/v1/calendar/events/:eventId/toggle` | `PATCH` | Yes | Toggles the completion status of a growth calendar task |
-| `/api/v1/chatbot/message` | `POST` | Yes | Sends text inquiry to AI virtual farmer assistant |
+| `/health` | `GET` | Public | System status, version, and server health check |
+| `/api-docs` | `GET` | Public | Interactive Swagger API documentation |
+| `/api/v1/auth/register` | `POST` | Public | Register new farmer account and send OTP |
+| `/api/v1/auth/login` | `POST` | Public | Authenticate user with mobile and password |
+| `/api/v1/auth/verify-otp` | `POST` | Public | Validate OTP and issue JWT access token |
+| `/api/v1/soil/analyze` | `POST` | Protected | Upload soil photo for AI classification & NPK balance report |
+| `/api/v1/soil/history` | `GET` | Protected | Retrieve past soil test records |
+| `/api/v1/disease/report` | `POST` | Protected | Upload leaf image for computer vision disease diagnosis |
+| `/api/v1/disease/outbreak-map` | `GET` | Public | Regional disease outbreak statistics map |
+| `/api/v1/calendar/events` | `GET` | Protected | Retrieve user's crop growth calendar schedule |
+| `/api/v1/calendar/events` | `POST` | Protected | Schedule new crop task / irrigation / fertilizer event |
+| `/api/v1/calendar/events/:id/toggle` | `PATCH` | Protected | Toggle completion status of calendar event |
+| `/api/v1/market/prices` | `GET` | Public | Live APMC market price trends and crop rate predictions |
+| `/api/v1/schemes` | `GET` | Public | Filterable list of central and state government farmer schemes |
+| `/api/v1/community/posts` | `GET` | Public | Farmer community Q&A, expert advice, and pest alert forum |
