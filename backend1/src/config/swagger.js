@@ -42,11 +42,11 @@ Authorization: Bearer <your_access_token>
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT || 5000}/api/v1`,
+        url: `http://localhost:${process.env.PORT || 5000}`,
         description: 'Development server',
       },
       {
-        url: 'https://api.agrisol.in/v1',
+        url: 'https://api.agrisol.in',
         description: 'Production server',
       },
     ],

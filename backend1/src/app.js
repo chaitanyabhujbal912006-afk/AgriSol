@@ -165,23 +165,21 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   try {
     await connectDB();
-    
-    // Redis is optional — app works without it (no caching)
-    try {
-      await connectRedis();
-    } catch (redisErr) {
-      logger.warn('⚠️  Redis unavailable — running without cache. Features still work.');
-    }
-
-    server.listen(PORT, () => {
-      logger.info(`🌱 AgriSol Backend running on port ${PORT} [${process.env.NODE_ENV}]`);
-      logger.info(`📚 API Docs: http://localhost:${PORT}/api-docs`);
-      logger.info(`❤️  Health: http://localhost:${PORT}/health`);
-    });
-  } catch (error) {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
+  } catch (dbErr) {
+    logger.warn('⚠️  MongoDB connection unavailable — running with offline fallback data.');
   }
+
+  try {
+    await connectRedis();
+  } catch (redisErr) {
+    logger.warn('⚠️  Redis unavailable — running without cache.');
+  }
+
+  server.listen(PORT, () => {
+    logger.info(`🌱 AgriSol Backend running on port ${PORT} [${process.env.NODE_ENV}]`);
+    logger.info(`📚 API Docs: http://localhost:${PORT}/api-docs`);
+    logger.info(`❤️  Health: http://localhost:${PORT}/health`);
+  });
 };
 
 // Graceful shutdown

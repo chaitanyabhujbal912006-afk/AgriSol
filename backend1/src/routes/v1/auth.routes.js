@@ -82,6 +82,8 @@ router.post('/resend-otp', authController.resendOTP);
  *     tags: [Auth]
  */
 router.post('/login', validate(loginSchema), authController.login);
+router.post('/signin', authController.login);
+router.post('/signup', validate(registerSchema), authController.register);
 
 /**
  * @swagger

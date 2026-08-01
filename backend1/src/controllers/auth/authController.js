@@ -144,9 +144,18 @@ exports.resendOTP = catchAsync(async (req, res) => {
 
 // ── Login with Password ───────────────────────
 exports.login = catchAsync(async (req, res) => {
-  const { mobile, password } = req.body;
+  const { mobile, email, identifier, password } = req.body;
+  const loginId = mobile || email || identifier;
 
-  const user = await User.findOne({ mobile }).select('+passwordHash');
+  if (!loginId || !password) {
+    throw new AppError('Please provide mobile/email and password', 400);
+  }
+
+  const query = loginId.includes('@')
+    ? { email: loginId.toLowerCase() }
+    : { mobile: loginId };
+
+  const user = await User.findOne(query).select('+passwordHash');
   if (!user || !user.passwordHash) {
     throw new AppError('Invalid credentials', 401);
   }
