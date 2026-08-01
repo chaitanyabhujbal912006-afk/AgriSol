@@ -335,6 +335,57 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* Scanner & AI Radar Animations */
+  .animate-radar-scan {
+    animation: radarScan 3s linear infinite;
+  }
+
+  @keyframes radarScan {
+    0% { transform: translateY(-100%); opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { transform: translateY(100%); opacity: 0.8; }
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+    100% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.6); }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Audio Wave Visualizer Bars */
+  .wave-bar {
+    display: inline-block;
+    width: 3px;
+    height: 16px;
+    border-radius: 3px;
+    background-color: var(--primary-green);
+    animation: wave 1.2s ease-in-out infinite;
+  }
+  .wave-bar:nth-child(1) { animation-delay: 0.0s; }
+  .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+  .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+
+  @keyframes wave {
+    0%, 100% { height: 6px; }
+    50% { height: 24px; }
+  }
 }
 
 /* Base Typography */

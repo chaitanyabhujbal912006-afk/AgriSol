@@ -13,7 +13,11 @@ import {
   RotateCcw,
   Sprout,
   Sun,
-  Cloud
+  Cloud,
+  DollarSign,
+  Calculator,
+  Sparkles,
+  CheckCircle2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -24,12 +28,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { ImageWithFallback } from '../shared/ImageWithFallback';
 
 interface CropRecommendationProps {
   onNavigate: (page: string, data?: any) => void;
   navigationData?: any;
-  userRole: 'farmer' | 'admin';
+  userRole?: 'farmer' | 'admin';
 }
 
 const cropRecommendations = [
@@ -37,13 +40,16 @@ const cropRecommendations = [
     id: 'rice',
     name: 'Rice (Paddy)',
     suitability: 92,
-    expectedYield: '4.5 tons/acre',
+    expectedYield: 4.5,
+    yieldUnit: 'tons/acre',
+    pricePerTon: 320,
+    costPerAcre: 450,
     duration: '120-150 days',
     season: 'Kharif',
     waterRequirement: 'High',
     profitability: 'High',
     image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&h=200&fit=crop',
-    description: 'Excellent choice for your current soil and climate conditions',
+    description: 'Optimal pH and rich Nitrogen profile guarantees highly productive rice yields.',
     requirements: {
       temperature: '20-35°C',
       rainfall: '1000-2000mm',
@@ -53,15 +59,18 @@ const cropRecommendations = [
   },
   {
     id: 'wheat',
-    name: 'Wheat',
-    suitability: 85,
-    expectedYield: '3.2 tons/acre',
+    name: 'Wheat (Durum)',
+    suitability: 88,
+    expectedYield: 3.8,
+    yieldUnit: 'tons/acre',
+    pricePerTon: 280,
+    costPerAcre: 380,
     duration: '110-130 days',
     season: 'Rabi',
     waterRequirement: 'Medium',
     profitability: 'Medium',
     image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=300&h=200&fit=crop',
-    description: 'Good option with moderate water requirements',
+    description: 'Excellent soil environment for cereal grain production.',
     requirements: {
       temperature: '12-25°C',
       rainfall: '300-1000mm',
@@ -70,594 +79,254 @@ const cropRecommendations = [
     }
   },
   {
-    id: 'sugarcane',
-    name: 'Sugarcane',
-    suitability: 78,
-    expectedYield: '45 tons/acre',
-    duration: '300-365 days',
-    season: 'Perennial',
-    waterRequirement: 'Very High',
-    profitability: 'Very High',
-    image: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=300&h=200&fit=crop',
-    description: 'Long-term high-yield crop with excellent market demand',
-    requirements: {
-      temperature: '26-32°C',
-      rainfall: '1500-2500mm',
-      soil: 'Deep, well-drained',
-      ph: '6.5-7.5'
-    }
-  },
-  {
-    id: 'cotton',
-    name: 'Cotton',
-    suitability: 72,
-    expectedYield: '2.8 quintals/acre',
-    duration: '160-200 days',
-    season: 'Kharif',
+    id: 'maize',
+    name: 'Hybrid Sweet Corn / Maize',
+    suitability: 82,
+    expectedYield: 4.1,
+    yieldUnit: 'tons/acre',
+    pricePerTon: 250,
+    costPerAcre: 350,
+    duration: '100-115 days',
+    season: 'Kharif/Rabi',
     waterRequirement: 'Medium',
     profitability: 'High',
-    image: 'https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=300&h=200&fit=crop',
-    description: 'Commercial crop with good export potential',
+    image: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=300&h=200&fit=crop',
+    description: 'Adapts well to varied local nutrient profiles with rapid turnover.',
     requirements: {
-      temperature: '21-27°C',
-      rainfall: '500-1000mm',
-      soil: 'Black cotton soil',
-      ph: '5.8-8.0'
+      temperature: '18-30°C',
+      rainfall: '500-800mm',
+      soil: 'Deep well-drained',
+      ph: '5.8-7.2'
     }
   }
 ];
 
-const regions = [
-  'Andhra Pradesh', 'Assam', 'Bihar', 'Gujarat', 'Haryana', 'Karnataka',
-  'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Odisha', 'Punjab', 
-  'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal'
-];
-
-interface BackendCrop {
-  name: string;
-  suitability: number;
-  expectedYield: string;
-  growthDuration: string;
-  waterDemand: string;
-  difficulty: string;
-  description: string;
-}
-
-export function CropRecommendation({ onNavigate, navigationData, userRole }: CropRecommendationProps) {
-  const [formData, setFormData] = useState({
-    nitrogen: [50],
-    phosphorus: [30],
-    potassium: [40],
-    ph: '',
-    rainfall: '',
-    temperature: '',
-    humidity: '',
-    region: navigationData?.soilType || ''
-  });
+export function CropRecommendation({ onNavigate, navigationData }: CropRecommendationProps) {
+  const [nitrogen, setNitrogen] = useState(50);
+  const [phosphorus, setPhosphorus] = useState(45);
+  const [potassium, setPotassium] = useState(60);
+  const [ph, setPh] = useState(6.5);
+  const [activeTab, setActiveTab] = useState<'recommendations' | 'calculator'>('recommendations');
   
-  const [showResults, setShowResults] = useState(false);
-  const [selectedCrop, setSelectedCrop] = useState<string | null>(null);
-  const [backendCrops, setBackendCrops] = useState<BackendCrop[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Calculator state
+  const [landAcres, setLandAcres] = useState(10);
+  const [selectedCropId, setSelectedCropId] = useState('rice');
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const selectedCrop = cropRecommendations.find(c => c.id === selectedCropId) || cropRecommendations[0];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    try {
-      const token = localStorage.getItem('agrisol_token');
-      const response = await fetch('http://localhost:5000/api/v1/crops/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify({
-          nitrogen: formData.nitrogen[0],
-          phosphorus: formData.phosphorus[0],
-          potassium: formData.potassium[0],
-          pH: formData.ph || 6.5,
-          rainfall: formData.rainfall,
-          temperature: formData.temperature,
-          humidity: formData.humidity,
-          region: formData.region
-        })
-      });
-      const data = await response.json();
-      if (data.success && data.recommendations) {
-        setBackendCrops(data.recommendations);
-        setShowResults(true);
-      } else {
-        throw new Error(data.message || 'Failed to get recommendations');
-      }
-    } catch (err: any) {
-      // Fallback to frontend data if backend unavailable
-      setBackendCrops([]);
-      setShowResults(true);
-      setError(err.message?.includes('fetch') ? null : err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleReset = () => {
-    setFormData({
-      nitrogen: [50],
-      phosphorus: [30],
-      potassium: [40],
-      ph: '',
-      rainfall: '',
-      temperature: '',
-      humidity: '',
-      region: ''
-    });
-    setShowResults(false);
-    setSelectedCrop(null);
-    setBackendCrops([]);
-    setError(null);
-  };
-
-  // Use backend crops if available, else fall back to static demo data
-  const displayCrops = backendCrops.length > 0
-    ? backendCrops.map((c, i) => ({
-        id: c.name.toLowerCase().replace(/\s+/g, '-'),
-        name: c.name,
-        suitability: c.suitability,
-        expectedYield: c.expectedYield,
-        duration: c.growthDuration,
-        season: 'Kharif',
-        waterRequirement: c.waterDemand,
-        profitability: c.suitability >= 85 ? 'High' : 'Medium',
-        image: cropRecommendations[i % cropRecommendations.length]?.image || cropRecommendations[0].image,
-        description: c.description,
-        requirements: cropRecommendations[i % cropRecommendations.length]?.requirements || cropRecommendations[0].requirements
-      }))
-    : cropRecommendations;
-
-  const getSuitabilityColor = (suitability: number) => {
-    if (suitability >= 80) return 'text-green-600 bg-green-50';
-    if (suitability >= 60) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
-  };
-
-  const getProfitabilityColor = (profitability: string) => {
-    switch (profitability) {
-      case 'Very High': return 'bg-green-600';
-      case 'High': return 'bg-green-500';
-      case 'Medium': return 'bg-yellow-500';
-      case 'Low': return 'bg-orange-500';
-      default: return 'bg-gray-500';
-    }
-  };
+  const totalYield = (selectedCrop.expectedYield * landAcres).toFixed(1);
+  const grossRevenue = (selectedCrop.expectedYield * landAcres * selectedCrop.pricePerTon).toFixed(0);
+  const totalCost = (selectedCrop.costPerAcre * landAcres).toFixed(0);
+  const netProfit = (Number(grossRevenue) - Number(totalCost)).toFixed(0);
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-            AI Crop Recommendation
+          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-3 py-1 font-bold text-xs rounded-full">
+            🌾 Agronomic Recommendation Suite
+          </Badge>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+            AI Crop Recommendation & Financial Profit Estimator
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Get personalized crop suggestions based on soil conditions and climate data
+          <p className="text-slate-500 dark:text-neutral-400 text-sm mt-1">
+            Configure soil NPK inputs to discover highest-yielding crops and simulate harvest profitability.
           </p>
         </div>
-        
-        {showResults && (
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => onNavigate('reports')}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export Report
-            </Button>
-            <Button
-              onClick={handleReset}
-              className="bg-primary-green hover:bg-primary-green/90 text-white"
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              New Analysis
-            </Button>
-          </div>
-        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Input Form */}
-        <Card className="glass-card border-0 lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sliders className="w-5 h-5" />
-              Input Parameters
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* NPK Sliders */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-foreground">Soil Nutrients (ppm)</h3>
-                
-                <div className="space-y-2">
-                  <Label className="flex items-center justify-between">
-                    Nitrogen (N)
-                    <span className="text-sm text-muted-foreground">{formData.nitrogen[0]}ppm</span>
-                  </Label>
-                  <Slider
-                    value={formData.nitrogen}
-                    onValueChange={(value) => handleInputChange('nitrogen', value)}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md bg-slate-100 dark:bg-neutral-900 rounded-xl p-1">
+          <TabsTrigger value="recommendations" className="rounded-lg font-bold text-xs">
+            <Sprout className="w-4 h-4 mr-2 text-emerald-500" />
+            Crop Matching Engine
+          </TabsTrigger>
+          <TabsTrigger value="calculator" className="rounded-lg font-bold text-xs">
+            <Calculator className="w-4 h-4 mr-2 text-emerald-500" />
+            Profit & Yield Estimator
+          </TabsTrigger>
+        </TabsList>
 
-                <div className="space-y-2">
-                  <Label className="flex items-center justify-between">
-                    Phosphorus (P)
-                    <span className="text-sm text-muted-foreground">{formData.phosphorus[0]}ppm</span>
-                  </Label>
-                  <Slider
-                    value={formData.phosphorus}
-                    onValueChange={(value) => handleInputChange('phosphorus', value)}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="flex items-center justify-between">
-                    Potassium (K)
-                    <span className="text-sm text-muted-foreground">{formData.potassium[0]}ppm</span>
-                  </Label>
-                  <Slider
-                    value={formData.potassium}
-                    onValueChange={(value) => handleInputChange('potassium', value)}
-                    max={100}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Environmental Factors */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-foreground">Environmental Conditions</h3>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>pH Level</Label>
-                    <Input
-                      type="number"
-                      placeholder="6.5"
-                      step="0.1"
-                      min="4"
-                      max="9"
-                      value={formData.ph}
-                      onChange={(e) => handleInputChange('ph', e.target.value)}
-                    />
+        {/* Crop Matching Engine */}
+        <TabsContent value="recommendations" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Control Panel */}
+            <Card className="glass-card-premium border-0 p-2">
+              <CardHeader>
+                <CardTitle className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <Sliders className="w-4 h-4 text-emerald-500" />
+                  Soil Chemistry Parameters
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-neutral-200 mb-1">
+                    <span>Nitrogen (N)</span>
+                    <span className="text-emerald-600 font-bold">{nitrogen} mg/kg</span>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Rainfall (mm)</Label>
-                    <Input
-                      type="number"
-                      placeholder="800"
-                      min="0"
-                      max="3000"
-                      value={formData.rainfall}
-                      onChange={(e) => handleInputChange('rainfall', e.target.value)}
-                    />
-                  </div>
+                  <Slider value={[nitrogen]} onValueChange={([v]) => setNitrogen(v)} max={140} min={0} step={1} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>Temperature (°C)</Label>
-                    <Input
-                      type="number"
-                      placeholder="25"
-                      min="-10"
-                      max="50"
-                      value={formData.temperature}
-                      onChange={(e) => handleInputChange('temperature', e.target.value)}
-                    />
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-neutral-200 mb-1">
+                    <span>Phosphorus (P)</span>
+                    <span className="text-emerald-600 font-bold">{phosphorus} mg/kg</span>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Humidity (%)</Label>
-                    <Input
-                      type="number"
-                      placeholder="70"
-                      min="0"
-                      max="100"
-                      value={formData.humidity}
-                      onChange={(e) => handleInputChange('humidity', e.target.value)}
-                    />
+                  <Slider value={[phosphorus]} onValueChange={([v]) => setPhosphorus(v)} max={140} min={0} step={1} />
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-neutral-200 mb-1">
+                    <span>Potassium (K)</span>
+                    <span className="text-emerald-600 font-bold">{potassium} mg/kg</span>
                   </div>
+                  <Slider value={[potassium]} onValueChange={([v]) => setPotassium(v)} max={200} min={0} step={1} />
                 </div>
-              </div>
 
-              {/* Location */}
-              <div className="space-y-2">
-                <Label>Region/State</Label>
-                <Select value={formData.region} onValueChange={(value) => handleInputChange('region', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your region" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {regions.map((region) => (
-                      <SelectItem key={region} value={region}>{region}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500 bg-red-50 p-2 rounded-lg">{error}</p>
-              )}
-              <Button
-                type="submit"
-                className="w-full clay-button bg-primary-green hover:bg-primary-green/90 text-white"
-                disabled={showResults || isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <TrendingUp className="w-4 h-4 mr-2" />
-                    Get Recommendations
-                  </>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2">
-          {!showResults ? (
-            <Card className="glass-card border-0 h-full flex items-center justify-center">
-              <CardContent className="text-center py-12">
-                <div className="w-16 h-16 bg-primary-green/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Sprout className="w-8 h-8 text-primary-green" />
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-700 dark:text-neutral-200 mb-1">
+                    <span>pH Level</span>
+                    <span className="text-emerald-600 font-bold">{ph}</span>
+                  </div>
+                  <Slider value={[ph]} onValueChange={([v]) => setPh(v)} max={10} min={3} step={0.1} />
                 </div>
-                <h3 className="font-semibold text-foreground mb-2">Ready for Analysis</h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Fill in the soil and environmental parameters on the left to get AI-powered crop recommendations tailored to your conditions.
-                </p>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-6">
-              {/* Recommendations Grid */}
-              <Card className="glass-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>Recommended Crops</span>
-                    <Badge className="bg-primary-green text-white">
-                      {displayCrops.length} matches found
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {displayCrops.map((crop) => (
-                      <Card
-                        key={crop.id}
-                        className={`cursor-pointer transition-all duration-200 hover:shadow-lg border ${
-                          selectedCrop === crop.id ? 'border-primary-green bg-primary-green/5' : 'border-border hover:border-primary-green/50'
-                        }`}
-                        onClick={() => setSelectedCrop(selectedCrop === crop.id ? null : crop.id)}
-                      >
-                        <div className="relative h-32 overflow-hidden">
-                          <ImageWithFallback
-                            src={crop.image}
-                            alt={crop.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          
-                          <div className="absolute top-2 right-2">
-                            <Badge className={`${getSuitabilityColor(crop.suitability)} border-0`}>
-                              {crop.suitability}% Match
-                            </Badge>
-                          </div>
 
-                          <div className="absolute bottom-2 left-2">
-                            <Badge className="bg-white/20 text-white border-0">
-                              {crop.season}
-                            </Badge>
+            {/* Recommendations Grid */}
+            <div className="lg:col-span-2 space-y-4">
+              {cropRecommendations.map((crop) => (
+                <Card key={crop.id} className="glass-card-premium border-0 overflow-hidden hover:border-emerald-500/40 transition-all">
+                  <div className="flex flex-col sm:flex-row">
+                    <img src={crop.image} alt={crop.name} className="w-full sm:w-48 h-44 object-cover" />
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-extrabold text-lg text-slate-800 dark:text-white">{crop.name}</h3>
+                          <Badge className="bg-emerald-500 text-white font-extrabold text-xs">
+                            {crop.suitability}% Suitability Match
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-neutral-400 mt-1">{crop.description}</p>
+                        
+                        <div className="grid grid-cols-3 gap-2 mt-4 text-center">
+                          <div className="p-2 rounded-xl bg-slate-100 dark:bg-neutral-900">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">Expected Yield</p>
+                            <p className="text-xs font-bold text-slate-800 dark:text-white">{crop.expectedYield} {crop.yieldUnit}</p>
+                          </div>
+                          <div className="p-2 rounded-xl bg-slate-100 dark:bg-neutral-900">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">Growth Period</p>
+                            <p className="text-xs font-bold text-slate-800 dark:text-white">{crop.duration}</p>
+                          </div>
+                          <div className="p-2 rounded-xl bg-slate-100 dark:bg-neutral-900">
+                            <p className="text-[9px] font-bold text-slate-400 uppercase">Season</p>
+                            <p className="text-xs font-bold text-slate-800 dark:text-white">{crop.season}</p>
                           </div>
                         </div>
-                        
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-semibold text-foreground">{crop.name}</h4>
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-3 h-3 ${
-                                    i < Math.floor(crop.suitability / 20) 
-                                      ? 'text-yellow-400 fill-current' 
-                                      : 'text-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <p className="text-xs text-muted-foreground mb-3">{crop.description}</p>
-                          
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">Expected Yield:</span>
-                              <span className="font-medium">{crop.expectedYield}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">Duration:</span>
-                              <span className="font-medium">{crop.duration}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">Water Need:</span>
-                              <span className="font-medium">{crop.waterRequirement}</span>
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-muted-foreground">Profitability:</span>
-                              <div className="flex items-center gap-1">
-                                <div className={`w-2 h-2 rounded-full ${getProfitabilityColor(crop.profitability)}`} />
-                                <span className="text-sm font-medium">{crop.profitability}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <Progress value={crop.suitability} className="mt-3 h-2" />
-                        </CardContent>
-                      </Card>
-                    ))}
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-neutral-800 flex items-center justify-between">
+                        <Button
+                          onClick={() => {
+                            setSelectedCropId(crop.id);
+                            setActiveTab('calculator');
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold h-9"
+                        >
+                          Calculate Financial Yield
+                          <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Detailed View */}
-              {selectedCrop && (
-                <Card className="glass-card border-0">
-                  <CardHeader>
-                    <CardTitle>Detailed Analysis - {displayCrops.find(c => c.id === selectedCrop)?.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {(() => {
-                      const crop = displayCrops.find(c => c.id === selectedCrop);
-                      if (!crop) return null;
-                      
-                      return (
-                        <Tabs defaultValue="requirements" className="space-y-4">
-                          <TabsList className="grid grid-cols-3 w-full">
-                            <TabsTrigger value="requirements">Requirements</TabsTrigger>
-                            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-                            <TabsTrigger value="economics">Economics</TabsTrigger>
-                          </TabsList>
-
-                          <TabsContent value="requirements" className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Thermometer className="w-4 h-4 text-blue-600" />
-                                  <span className="text-sm font-medium text-blue-800">Temperature</span>
-                                </div>
-                                <p className="text-lg font-bold text-blue-900">{crop.requirements.temperature}</p>
-                              </div>
-                              
-                              <div className="p-4 rounded-lg bg-cyan-50 border border-cyan-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <Droplets className="w-4 h-4 text-cyan-600" />
-                                  <span className="text-sm font-medium text-cyan-800">Rainfall</span>
-                                </div>
-                                <p className="text-lg font-bold text-cyan-900">{crop.requirements.rainfall}</p>
-                              </div>
-                              
-                              <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <div className="w-4 h-4 bg-amber-600 rounded" />
-                                  <span className="text-sm font-medium text-amber-800">Soil Type</span>
-                                </div>
-                                <p className="text-lg font-bold text-amber-900">{crop.requirements.soil}</p>
-                              </div>
-                              
-                              <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <div className="w-4 h-4 bg-green-600 rounded-full" />
-                                  <span className="text-sm font-medium text-green-800">pH Range</span>
-                                </div>
-                                <p className="text-lg font-bold text-green-900">{crop.requirements.ph}</p>
-                              </div>
-                            </div>
-                          </TabsContent>
-
-                          <TabsContent value="timeline" className="space-y-4">
-                            <div className="space-y-4">
-                              <div className="p-4 rounded-lg border border-border">
-                                <h4 className="font-semibold mb-2">Growing Timeline</h4>
-                                <div className="space-y-3">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 bg-green-500 rounded-full" />
-                                    <span className="text-sm">Sowing: Week 1-2</span>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                                    <span className="text-sm">Vegetative Growth: Week 3-8</span>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-                                    <span className="text-sm">Flowering: Week 9-12</span>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 bg-orange-500 rounded-full" />
-                                    <span className="text-sm">Harvest: Week 15-20</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </TabsContent>
-
-                          <TabsContent value="economics" className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                                <h4 className="font-semibold text-green-800 mb-2">Investment</h4>
-                                <p className="text-2xl font-bold text-green-900">₹25,000/acre</p>
-                                <p className="text-sm text-green-700">Initial setup cost</p>
-                              </div>
-                              
-                              <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                                <h4 className="font-semibold text-blue-800 mb-2">Expected Revenue</h4>
-                                <p className="text-2xl font-bold text-blue-900">₹45,000/acre</p>
-                                <p className="text-sm text-blue-700">Gross income</p>
-                              </div>
-                            </div>
-                          </TabsContent>
-                        </Tabs>
-                      );
-                    })()}
-                  </CardContent>
                 </Card>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  onClick={() => onNavigate('growth-calendar', { crops: displayCrops.slice(0, 2) })}
-                  className="clay-button bg-primary-green hover:bg-primary-green/90 text-white"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Add to Growth Calendar
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => onNavigate('plant-explorer', { crop: selectedCrop || displayCrops[0]?.id })}
-                >
-                  Explore Plant Details
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
-      </div>
+
+          </div>
+        </TabsContent>
+
+        {/* Profit & Yield Estimator Calculator */}
+        <TabsContent value="calculator" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <Card className="glass-card-premium border-0 p-2">
+              <CardHeader>
+                <CardTitle className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <Calculator className="w-4 h-4 text-emerald-500" />
+                  Farm Area & Target Crop Parameters
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label className="text-xs font-bold text-slate-700 dark:text-neutral-200">Total Cultivated Farmland (Acres)</Label>
+                  <Input 
+                    type="number" 
+                    value={landAcres} 
+                    onChange={(e) => setLandAcres(Math.max(1, Number(e.target.value)))}
+                    className="mt-1 h-10 rounded-xl bg-slate-100 dark:bg-neutral-900 border-slate-200 dark:border-neutral-800 font-bold"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs font-bold text-slate-700 dark:text-neutral-200">Select Crop Target</Label>
+                  <Select value={selectedCropId} onValueChange={setSelectedCropId}>
+                    <SelectTrigger className="mt-1 h-10 rounded-xl bg-slate-100 dark:bg-neutral-900 border-slate-200 dark:border-neutral-800 font-bold">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cropRecommendations.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Financial Projection Dashboard */}
+            <Card className="lg:col-span-2 glass-card-premium border-0 p-2">
+              <CardHeader>
+                <CardTitle className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <DollarSign className="w-5 h-5 text-emerald-500" />
+                  Simulated Financial Return for {selectedCrop.name} ({landAcres} Acres)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                    <p className="text-xs font-bold text-slate-500 dark:text-neutral-400">Total Harvest Yield</p>
+                    <p className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">{totalYield} Tons</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-center">
+                    <p className="text-xs font-bold text-slate-500 dark:text-neutral-400">Gross Estimated Revenue</p>
+                    <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">${grossRevenue}</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-center">
+                    <p className="text-xs font-bold text-slate-500 dark:text-neutral-400">Estimated Net Profit</p>
+                    <p className="text-2xl font-extrabold text-teal-600 dark:text-teal-400 mt-1">${netProfit}</p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-neutral-900 border border-slate-200/50 dark:border-neutral-800 space-y-2">
+                  <h4 className="font-bold text-xs text-slate-800 dark:text-white uppercase tracking-wider">Financial Breakdown</h4>
+                  <div className="flex justify-between text-xs py-1 border-b border-slate-200/40 dark:border-neutral-800">
+                    <span className="text-slate-500">Seed & Input Fertilizer Cost (${selectedCrop.costPerAcre}/acre)</span>
+                    <span className="font-bold text-red-500">-${totalCost}</span>
+                  </div>
+                  <div className="flex justify-between text-xs py-1 border-b border-slate-200/40 dark:border-neutral-800">
+                    <span className="text-slate-500">Commodity Market Price (${selectedCrop.pricePerTon}/ton)</span>
+                    <span className="font-bold text-slate-800 dark:text-white">${selectedCrop.pricePerTon} / Ton</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

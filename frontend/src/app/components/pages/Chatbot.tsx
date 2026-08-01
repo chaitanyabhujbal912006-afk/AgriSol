@@ -9,7 +9,9 @@ import {
   Globe,
   Lightbulb,
   Calendar,
-  BookOpen
+  BookOpen,
+  Sparkles,
+  Volume2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -20,23 +22,28 @@ import { Avatar, AvatarFallback } from '../ui/avatar';
 interface ChatbotProps {
   onNavigate: (page: string, data?: any) => void;
   navigationData?: any;
-  userRole: 'farmer' | 'admin';
+  userRole?: 'farmer' | 'admin';
 }
 
 const suggestedQuestions = [
-  "Which crop is best for Kharif season in Tamil Nadu?",
-  "How to treat leaf blight in tomatoes?",
-  "What's the ideal NPK ratio for wheat?",
-  "When should I harvest my rice crop?",
-  "How to improve soil fertility naturally?",
-  "What are the signs of nutrient deficiency?"
+  "Which crop is best for Kharif season in alluvial soil?",
+  "How to treat early blight in tomatoes?",
+  "What is the ideal NPK ratio for durum wheat?",
+  "When should I schedule secondary irrigation for rice?"
+];
+
+const promptCategories = [
+  { label: '🧪 Soil Chemistry', query: 'What is ideal pH for wheat?' },
+  { label: '🌿 Disease Diagnosis', query: 'How to treat tomato early blight?' },
+  { label: '💧 Irrigation Guide', query: 'How much water does rice require?' },
+  { label: '🌾 Fertilizer Plan', query: 'What is ideal NPK ratio for rice?' }
 ];
 
 const mockMessages = [
   {
     id: 1,
     type: 'bot',
-    content: "Hello! I'm your Virtual Farming Adviser. I can help you with crop recommendations, disease management, soil health, and general farming questions. How can I assist you today?",
+    content: "Hello! I am your AI Agronomic Adviser. Ask me anything regarding soil diagnostics, crop suitability, pest management, or irrigation schedules.",
     timestamp: new Date().toISOString()
   }
 ];
@@ -45,12 +52,21 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
   const [messages, setMessages] = useState(mockMessages);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [language, setLanguage] = useState('English');
+  const [isListening, setIsListening] = useState(false);
+
+  const toggleVoiceListen = () => {
+    setIsListening(!isListening);
+    if (!isListening) {
+      setTimeout(() => {
+        setInputMessage("What is the optimal NPK ratio for paddy rice?");
+        setIsListening(false);
+      }, 2500);
+    }
+  };
 
   const handleSendMessage = async (message: string = inputMessage) => {
     if (!message.trim()) return;
 
-    // Add user message
     const userMessage = {
       id: Date.now(),
       type: 'user' as const,
@@ -82,7 +98,6 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
       };
       setMessages(prev => [...prev, aiMessage]);
     } catch {
-      // Backend offline – use local response
       const botResponse = generateResponse(message);
       const aiMessage = {
         id: Date.now() + 1,
@@ -98,24 +113,13 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
 
   const generateResponse = (query: string) => {
     const lowerQuery = query.toLowerCase();
-    
-    if (lowerQuery.includes('wheat') || lowerQuery.includes('crop recommendation')) {
-      return "Based on your query about wheat cultivation, here are my recommendations:\n\n🌾 **Best Varieties**: HD-2967, PBW-343, WH-147\n📅 **Sowing Time**: November-December\n🌡️ **Temperature**: 15-25°C optimal\n💧 **Water**: 450-650mm total requirement\n🧪 **Soil**: Well-drained loamy soil, pH 6.0-7.5\n\nWould you like specific information about fertilizer application or pest management for wheat?";
+    if (lowerQuery.includes('ph') || lowerQuery.includes('soil')) {
+      return 'Soil pH between 6.0 and 7.0 is ideal for maximum nutrient absorption in cereal crops.';
     }
-    
-    if (lowerQuery.includes('tomato') || lowerQuery.includes('blight')) {
-      return "For tomato late blight management:\n\n🔍 **Symptoms**: Dark brown lesions, white fungal growth\n🛡️ **Prevention**: \n• Use resistant varieties\n• Avoid overhead irrigation\n• Ensure good air circulation\n• Remove infected plants\n\n💊 **Treatment**:\n• Copper-based fungicides\n• Mancozeb sprays\n• Bordeaux mixture\n\nShall I help you plan a spray schedule or suggest resistant varieties?";
+    if (lowerQuery.includes('blight') || lowerQuery.includes('disease') || lowerQuery.includes('tomato')) {
+      return 'Tomato Early Blight causes dark concentric rings on bottom leaves. Apply copper-based fungicides immediately.';
     }
-    
-    if (lowerQuery.includes('soil') || lowerQuery.includes('fertility')) {
-      return "Here are natural methods to improve soil fertility:\n\n🌱 **Organic Matter**:\n• Add compost regularly\n• Use farmyard manure\n• Green manuring with legumes\n\n🔄 **Crop Rotation**:\n• Include nitrogen-fixing crops\n• Rotate with different plant families\n\n🪱 **Biological Methods**:\n• Encourage earthworm activity\n• Use beneficial microorganisms\n• Avoid excessive tillage\n\nWould you like a soil testing recommendation or composting guide?";
-    }
-    
-    if (lowerQuery.includes('npk') || lowerQuery.includes('fertilizer')) {
-      return "NPK requirements vary by crop. Here are general guidelines:\n\n🌾 **Wheat**: 120:60:40 kg/ha\n🍚 **Rice**: 120:60:40 kg/ha  \n🍅 **Tomato**: 150:75:75 kg/ha\n🌽 **Maize**: 120:60:40 kg/ha\n\n📋 **Application Schedule**:\n• Basal: 50% N + 100% P + 100% K\n• Top dressing: Remaining N in splits\n\nDo you need specific recommendations for your crop and soil type?";
-    }
-    
-    return "Thank you for your question! While I'm still learning, I can help you with:\n\n• 🌾 Crop recommendations\n• 🧪 Soil management\n• 🐛 Pest & disease control\n• 🌤️ Weather-based advice\n• 📅 Farming calendar planning\n\nCould you please provide more specific details about your farming situation? For complex queries, I recommend consulting with our expert team or checking our video tutorial library.";
+    return 'For optimal crop performance, maintain balanced NPK ratios and drip irrigation. Check our Soil & Crop tools for detailed plans.';
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

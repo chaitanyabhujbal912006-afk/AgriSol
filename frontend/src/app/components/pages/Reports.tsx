@@ -4,401 +4,162 @@ import {
   Download, 
   Calendar,
   BarChart3,
-  PieChart,
+  PieChart as PieChartIcon,
   TrendingUp,
   Filter,
   Share,
   Mail,
   Printer,
   Eye,
-  Clock
+  Clock,
+  Sparkles,
+  CheckCircle2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Progress } from '../ui/progress';
-import { ImageWithFallback } from '../shared/ImageWithFallback';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from 'recharts';
 
 interface ReportsProps {
   onNavigate: (page: string, data?: any) => void;
   navigationData?: any;
-  userRole: 'farmer' | 'admin';
+  userRole?: 'farmer' | 'admin';
 }
+
+const cropDistributionData = [
+  { name: 'Basmati Rice', acres: 20, color: '#10b981' },
+  { name: 'Durum Wheat', acres: 15, color: '#3b82f6' },
+  { name: 'Sweet Corn Maize', acres: 10, color: '#f59e0b' },
+  { name: 'Hybrid Tomato', acres: 5, color: '#ef4444' },
+];
 
 const reportTemplates = [
   {
     id: 'crop-analysis',
-    title: 'Crop Analysis Report',
-    description: 'Comprehensive analysis of crop recommendations and performance',
-    icon: <TrendingUp className="w-6 h-6" />,
+    title: 'Crop Yield & Suitability Summary',
+    description: 'Comprehensive analysis of recommended crops, yields, and harvest schedules.',
     category: 'Analytics',
     format: ['PDF', 'Excel'],
-    estimatedTime: '2-3 minutes',
-    lastGenerated: '2024-03-10',
-    features: ['Crop suitability scores', 'Weather impact analysis', 'Yield predictions', 'ROI calculations']
+    lastGenerated: '2026-08-01'
   },
   {
     id: 'soil-health',
-    title: 'Soil Health Summary',
-    description: 'Detailed soil analysis results and improvement recommendations',
-    icon: <div className="w-6 h-6 bg-amber-500 rounded" />,
+    title: 'Soil Chemistry Diagnostic Log',
+    description: 'Detailed NPK nutrient levels, pH ratings, and compost application guidance.',
     category: 'Soil',
     format: ['PDF'],
-    estimatedTime: '1-2 minutes',
-    lastGenerated: '2024-03-08',
-    features: ['pH levels', 'Nutrient analysis', 'Soil type classification', 'Fertilizer recommendations']
-  },
-  {
-    id: 'farm-activity',
-    title: 'Farm Activity Log',
-    description: 'Complete log of farming activities and scheduled tasks',
-    icon: <Calendar className="w-6 h-6" />,
-    category: 'Management',
-    format: ['PDF', 'Excel', 'CSV'],
-    estimatedTime: '1 minute',
-    lastGenerated: '2024-03-12',
-    features: ['Activity timeline', 'Task completion rates', 'Resource utilization', 'Labor tracking']
-  },
-  {
-    id: 'disease-incidents',
-    title: 'Disease & Pest Report',
-    description: 'Analysis of disease incidents and treatment effectiveness',
-    icon: <div className="w-6 h-6 bg-red-500 rounded-full" />,
-    category: 'Health',
-    format: ['PDF'],
-    estimatedTime: '2 minutes',
-    lastGenerated: '2024-03-05',
-    features: ['Disease identification', 'Treatment history', 'Prevention strategies', 'Cost analysis']
+    lastGenerated: '2026-07-28'
   },
   {
     id: 'financial-summary',
-    title: 'Financial Performance',
-    description: 'Revenue, costs, and profitability analysis by crop and season',
-    icon: <BarChart3 className="w-6 h-6" />,
+    title: 'Farm Revenue & Financial Return Report',
+    description: 'Calculated gross income, fertilizer input costs, and net projected margins.',
     category: 'Finance',
-    format: ['PDF', 'Excel'],
-    estimatedTime: '3-4 minutes',
-    lastGenerated: '2024-03-01',
-    features: ['Revenue analysis', 'Cost breakdown', 'Profit margins', 'ROI by crop']
-  },
-  {
-    id: 'water-usage',
-    title: 'Water Management Report',
-    description: 'Irrigation efficiency and water consumption analysis',
-    icon: <div className="w-6 h-6 bg-blue-500 rounded-full" />,
-    category: 'Resources',
-    format: ['PDF', 'Excel'],
-    estimatedTime: '2 minutes',
-    lastGenerated: '2024-03-07',
-    features: ['Water consumption', 'Irrigation schedules', 'Efficiency metrics', 'Cost savings']
+    format: ['PDF', 'CSV'],
+    lastGenerated: '2026-07-25'
   }
 ];
 
-const recentReports = [
-  {
-    id: 1,
-    title: 'Q1 2024 Crop Analysis',
-    type: 'crop-analysis',
-    generatedDate: '2024-03-12',
-    format: 'PDF',
-    size: '2.4 MB',
-    status: 'completed'
-  },
-  {
-    id: 2,
-    title: 'March Activity Log',
-    type: 'farm-activity',
-    generatedDate: '2024-03-10',
-    format: 'Excel',
-    size: '1.8 MB',
-    status: 'completed'
-  },
-  {
-    id: 3,
-    title: 'Soil Health Assessment',
-    type: 'soil-health',
-    generatedDate: '2024-03-08',
-    format: 'PDF',
-    size: '3.1 MB',
-    status: 'completed'
-  },
-  {
-    id: 4,
-    title: 'February Financial Summary',
-    type: 'financial-summary',
-    generatedDate: '2024-03-01',
-    format: 'PDF',
-    size: '2.7 MB',
-    status: 'completed'
-  }
-];
+export function Reports({ onNavigate }: ReportsProps) {
+  const [isExporting, setIsExporting] = useState(false);
 
-export function Reports({ onNavigate, navigationData, userRole }: ReportsProps) {
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedFormat, setSelectedFormat] = useState('All');
-  const [generatingReport, setGeneratingReport] = useState<string | null>(null);
-
-  const categories = ['All', 'Analytics', 'Soil', 'Management', 'Health', 'Finance', 'Resources'];
-  const formats = ['All', 'PDF', 'Excel', 'CSV'];
-
-  const filteredReports = reportTemplates.filter(report => {
-    const matchesCategory = selectedCategory === 'All' || report.category === selectedCategory;
-    const matchesFormat = selectedFormat === 'All' || report.format.includes(selectedFormat);
-    return matchesCategory && matchesFormat;
-  });
-
-  const handleGenerateReport = async (reportId: string) => {
-    setGeneratingReport(reportId);
-    
-    // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    setGeneratingReport(null);
-    
-    // In real app, would trigger actual report generation and download
-    console.log(`Generated report: ${reportId}`);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'processing': return 'bg-yellow-100 text-yellow-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const handleExportPDF = () => {
+    setIsExporting(true);
+    setTimeout(() => {
+      setIsExporting(false);
+      window.print();
+    }, 800);
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-            Reports & Analytics
+          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-3 py-1 font-bold text-xs rounded-full">
+            📊 AgriSol Telemetry Reports
+          </Badge>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+            Farm Analytics & Exportable Summaries
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Generate comprehensive reports and export your farming data
+          <p className="text-slate-500 dark:text-neutral-400 text-sm mt-1">
+            Generate printable PDF reports, export soil diagnostics, and view crop land allocation.
           </p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <Button variant="outline">
-            <Share className="w-4 h-4 mr-2" />
-            Share Report
-          </Button>
-          <Button variant="outline">
-            <Mail className="w-4 h-4 mr-2" />
-            Email Reports
-          </Button>
-        </div>
+
+        <Button 
+          onClick={handleExportPDF}
+          disabled={isExporting}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl px-5 h-11 text-xs shadow-lg shadow-emerald-500/20"
+        >
+          <Printer className="w-4 h-4 mr-2" />
+          {isExporting ? 'Preparing Report...' : 'Print / Export PDF Summary'}
+        </Button>
       </div>
 
-      <Tabs defaultValue="templates" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="templates">Report Templates</TabsTrigger>
-          <TabsTrigger value="history">Report History</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="templates" className="space-y-6">
-          {/* Filters */}
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="w-5 h-5" />
-                Filter Reports
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Category</label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Format</label>
-                  <Select value={selectedFormat} onValueChange={setSelectedFormat}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {formats.map(format => (
-                        <SelectItem key={format} value={format}>{format}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-end">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setSelectedCategory('All');
-                      setSelectedFormat('All');
-                    }}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Crop Land Allocation Pie Chart */}
+        <Card className="glass-card-premium border-0 p-2">
+          <CardHeader>
+            <CardTitle className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <PieChartIcon className="w-4 h-4 text-emerald-500" />
+              Farmland Crop Allocation (Acres)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-60 w-full flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={cropDistributionData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={4}
+                    dataKey="acres"
                   >
-                    Clear Filters
-                  </Button>
+                    {cropDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                  <Legend fontSize={11} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Report Templates */}
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="font-extrabold text-base text-slate-800 dark:text-white">Available Telemetry Reports</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {reportTemplates.map(report => (
+              <Card key={report.id} className="glass-card-premium border-0 p-4 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">{report.category}</Badge>
+                    <span className="text-[10px] text-slate-400">Last run: {report.lastGenerated}</span>
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-800 dark:text-white mt-1">{report.title}</h4>
+                  <p className="text-xs text-slate-500 dark:text-neutral-400 mt-0.5">{report.description}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Report Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredReports.map((report) => (
-              <Card key={report.id} className="glass-card border-0 hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-primary-green/10 text-primary-green">
-                        {report.icon}
-                      </div>
-                      <Badge variant="outline">{report.category}</Badge>
-                    </div>
-                  </div>
-                  <CardTitle className="text-lg">{report.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{report.description}</p>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Features */}
-                    <div>
-                      <p className="text-sm font-medium mb-2">Includes:</p>
-                      <div className="space-y-1">
-                        {report.features.slice(0, 3).map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <div className="w-1 h-1 bg-primary-green rounded-full" />
-                            <span className="text-xs text-muted-foreground">{feature}</span>
-                          </div>
-                        ))}
-                        {report.features.length > 3 && (
-                          <p className="text-xs text-muted-foreground">
-                            +{report.features.length - 3} more features
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Metadata */}
-                    <div className="grid grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <p className="text-muted-foreground">Generation Time</p>
-                        <p className="font-medium">{report.estimatedTime}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground">Last Generated</p>
-                        <p className="font-medium">{new Date(report.lastGenerated).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-
-                    {/* Format Options */}
-                    <div>
-                      <p className="text-sm font-medium mb-2">Available Formats:</p>
-                      <div className="flex gap-2">
-                        {report.format.map((fmt) => (
-                          <Badge key={fmt} variant="outline" className="text-xs">
-                            {fmt}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2">
-                      <Button
-                        className="flex-1 clay-button bg-primary-green hover:bg-primary-green/90 text-white"
-                        onClick={() => handleGenerateReport(report.id)}
-                        disabled={generatingReport === report.id}
-                      >
-                        {generatingReport === report.id ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                            Generating...
-                          </>
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4 mr-2" />
-                            Generate
-                          </>
-                        )}
-                      </Button>
-                      
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
+                <Button 
+                  onClick={handleExportPDF}
+                  variant="outline" 
+                  className="rounded-xl text-xs font-bold h-9 border-slate-200 dark:border-neutral-800"
+                >
+                  <Download className="w-3.5 h-3.5 mr-1" />
+                  Export
+                </Button>
               </Card>
             ))}
           </div>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="history" className="space-y-6">
-          {/* Report History */}
-          <Card className="glass-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Recent Reports
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentReports.map((report) => (
-                  <div key={report.id} className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-lg bg-blue-100">
-                        <FileText className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground">{report.title}</h4>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>Generated {new Date(report.generatedDate).toLocaleDateString()}</span>
-                          <span>•</span>
-                          <span>{report.format} • {report.size}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <Badge className={getStatusColor(report.status)}>
-                        {report.status}
-                      </Badge>
-                      
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Share className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 }

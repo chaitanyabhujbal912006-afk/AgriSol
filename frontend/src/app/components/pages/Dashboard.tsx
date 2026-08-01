@@ -5,7 +5,7 @@ import {
   Droplets, 
   Thermometer,
   AlertTriangle,
-  CheckCircle,
+  CheckCircle2,
   Clock,
   MapPin,
   BarChart3,
@@ -17,88 +17,57 @@ import {
   Sun,
   Cloud,
   MessageSquare,
-  TestTube
+  TestTube,
+  Activity,
+  Layers
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { ImageWithFallback } from '../shared/ImageWithFallback';
+import { 
+  ResponsiveContainer, 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  Tooltip as RechartsTooltip, 
+  RadarChart, 
+  PolarGrid, 
+  PolarAngleAxis, 
+  PolarRadiusAxis, 
+  Radar 
+} from 'recharts';
 
 interface DashboardProps {
   onNavigate: (page: string, data?: any) => void;
   userRole: 'farmer' | 'admin';
 }
 
-const kpiCards = [
-  {
-    title: 'Recommended Crops',
-    value: '12',
-    change: '+3 this month',
-    trend: 'up',
-    icon: <Sprout className="w-5 h-5" />,
-    color: 'text-green-600'
-  },
-  {
-    title: 'Planned Acres',
-    value: '45.5',
-    change: '+5.2 acres',
-    trend: 'up',
-    icon: <MapPin className="w-5 h-5" />,
-    color: 'text-blue-600'
-  },
-  {
-    title: 'Upcoming Tasks',
-    value: '8',
-    change: '3 due today',
-    trend: 'neutral',
-    icon: <Clock className="w-5 h-5" />,
-    color: 'text-orange-600'
-  },
-  {
-    title: 'Soil Health Score',
-    value: '85%',
-    change: '+5% improved',
-    trend: 'up',
-    icon: <CheckCircle className="w-5 h-5" />,
-    color: 'text-green-600'
-  }
+const initialTasks = [
+  { id: 1, task: 'Apply Fertilizer - Wheat Field A', date: 'Today, 6:00 AM', priority: 'high', status: 'pending', crop: 'Wheat' },
+  { id: 2, task: 'Drip Irrigation - Rice Field B', date: 'Today, 4:00 PM', priority: 'medium', status: 'pending', crop: 'Rice' },
+  { id: 3, task: 'Pest Inspection - Tomato Greenhouse', date: 'Tomorrow, 8:00 AM', priority: 'high', status: 'pending', crop: 'Tomato' },
+  { id: 4, task: 'Harvest Soil Testing - Maize Field C', date: 'Aug 5, 2026', priority: 'low', status: 'pending', crop: 'Maize' }
 ];
 
-const upcomingTasks = [
-  {
-    id: 1,
-    task: 'Apply Fertilizer - Wheat Field A',
-    date: 'Today, 6:00 AM',
-    priority: 'high',
-    status: 'pending',
-    crop: 'Wheat'
-  },
-  {
-    id: 2,
-    task: 'Irrigation - Rice Field B',
-    date: 'Today, 4:00 PM',
-    priority: 'medium',
-    status: 'pending',
-    crop: 'Rice'
-  },
-  {
-    id: 3,
-    task: 'Pest Inspection - Tomato Greenhouse',
-    date: 'Tomorrow, 8:00 AM',
-    priority: 'high',
-    status: 'scheduled',
-    crop: 'Tomato'
-  },
-  {
-    id: 4,
-    task: 'Harvest - Maize Field C',
-    date: 'Jan 25, 2024',
-    priority: 'low',
-    status: 'scheduled',
-    crop: 'Maize'
-  }
+const telemetrySeries = [
+  { day: 'Mon', temp: 26, humidity: 72, moisture: 65 },
+  { day: 'Tue', temp: 28, humidity: 68, moisture: 62 },
+  { day: 'Wed', temp: 30, humidity: 60, moisture: 58 },
+  { day: 'Thu', temp: 29, humidity: 64, moisture: 60 },
+  { day: 'Fri', temp: 27, humidity: 78, moisture: 74 },
+  { day: 'Sat', temp: 25, humidity: 82, moisture: 80 },
+  { day: 'Sun', temp: 28, humidity: 70, moisture: 68 },
+];
+
+const npkRadarData = [
+  { subject: 'Nitrogen (N)', value: 85, fullMark: 100 },
+  { subject: 'Phosphorus (P)', value: 68, fullMark: 100 },
+  { subject: 'Potassium (K)', value: 92, fullMark: 100 },
+  { subject: 'pH Balance', value: 78, fullMark: 100 },
+  { subject: 'Organic Matter', value: 88, fullMark: 100 },
+  { subject: 'Moisture Index', value: 75, fullMark: 100 },
 ];
 
 const weatherData = {
@@ -107,56 +76,26 @@ const weatherData = {
     condition: 'Partly Cloudy',
     humidity: '68%',
     rainfall: '12mm',
-    icon: <Sun className="w-8 h-8 text-yellow-500" />
+    icon: <Sun className="w-8 h-8 text-amber-500 animate-pulse" />
   },
   forecast: [
-    { day: 'Today', high: '32°', low: '24°', condition: 'Sunny', icon: <Sun className="w-5 h-5" /> },
-    { day: 'Tomorrow', high: '29°', low: '22°', condition: 'Cloudy', icon: <Cloud className="w-5 h-5" /> },
-    { day: 'Thu', high: '31°', low: '25°', condition: 'Sunny', icon: <Sun className="w-5 h-5" /> },
-    { day: 'Fri', high: '27°', low: '21°', condition: 'Rain', icon: <Droplets className="w-5 h-5" /> }
+    { day: 'Today', high: '32°', low: '24°', condition: 'Sunny', icon: <Sun className="w-5 h-5 text-amber-500" /> },
+    { day: 'Tomorrow', high: '29°', low: '22°', condition: 'Cloudy', icon: <Cloud className="w-5 h-5 text-slate-400" /> },
+    { day: 'Thu', high: '31°', low: '25°', condition: 'Sunny', icon: <Sun className="w-5 h-5 text-amber-500" /> },
+    { day: 'Fri', high: '27°', low: '21°', condition: 'Rain', icon: <Droplets className="w-5 h-5 text-blue-500" /> }
   ]
 };
 
 const cropProgress = [
-  { name: 'Wheat', progress: 75, stage: 'Flowering', acres: 15, status: 'healthy' },
-  { name: 'Rice', progress: 45, stage: 'Vegetative', acres: 20, status: 'healthy' },
-  { name: 'Tomato', progress: 60, stage: 'Fruiting', acres: 5, status: 'attention' },
-  { name: 'Maize', progress: 90, stage: 'Maturity', acres: 10, status: 'ready' }
-];
-
-const recentActivity = [
-  {
-    id: 1,
-    action: 'Soil test completed for Field A',
-    time: '2 hours ago',
-    type: 'test',
-    icon: <CheckCircle className="w-4 h-4 text-green-500" />
-  },
-  {
-    id: 2,
-    action: 'New crop recommendation: Sugarcane',
-    time: '4 hours ago',
-    type: 'recommendation',
-    icon: <Sprout className="w-4 h-4 text-blue-500" />
-  },
-  {
-    id: 3,
-    action: 'Weather alert: Heavy rain expected',
-    time: '6 hours ago',
-    type: 'alert',
-    icon: <AlertTriangle className="w-4 h-4 text-orange-500" />
-  },
-  {
-    id: 4,
-    action: 'Fertilizer application scheduled',
-    time: '1 day ago',
-    type: 'schedule',
-    icon: <Calendar className="w-4 h-4 text-purple-500" />
-  }
+  { name: 'Wheat (Winter Special)', progress: 75, stage: 'Flowering Stage', acres: 15, status: 'healthy' },
+  { name: 'Basmati Rice', progress: 45, stage: 'Vegetative Tillering', acres: 20, status: 'healthy' },
+  { name: 'Hybrid Tomato', progress: 60, stage: 'Fruiting Phase', acres: 5, status: 'attention' },
+  { name: 'Sweet Corn Maize', progress: 90, stage: 'Near Harvest Maturity', acres: 10, status: 'ready' }
 ];
 
 export function Dashboard({ onNavigate, userRole }: DashboardProps) {
   const [userName, setUserName] = useState('Farmer');
+  const [tasks, setTasks] = useState(initialTasks);
 
   useEffect(() => {
     const userStr = localStorage.getItem('agrisol_user');
@@ -170,268 +109,287 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
     }
   }, []);
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
+  const toggleTaskCompletion = (taskId: number) => {
+    setTasks(prev => prev.map(t => t.id === taskId ? {
+      ...t, 
+      status: t.status === 'completed' ? 'pending' : 'completed'
+    } : t));
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'text-green-600';
-      case 'attention': return 'text-yellow-600';
-      case 'ready': return 'text-blue-600';
-      default: return 'text-gray-600';
-    }
-  };
+  const completedCount = tasks.filter(t => t.status === 'completed').length;
+  const pendingCount = tasks.length - completedCount;
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
+    <div className="space-y-8">
+      {/* Top Banner Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fade-in-up">
         <div>
-          <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Welcome back, <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">{userName}</span>! 🌾
+          <div className="flex items-center gap-2">
+            <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-3 py-1 font-bold text-xs rounded-full">
+              ✨ AgriSol Telemetry v2.4 Active
+            </Badge>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
+            Welcome back, <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 bg-clip-text text-transparent">{userName}</span>! 🌾
           </h1>
           <p className="text-slate-500 dark:text-neutral-400 text-sm mt-1">
-            Precision farming telemetry logs are online. Here is your farm's state today.
+            Real-time IoT sensors and satellite telemetry online. Here is your digital farm report today.
           </p>
         </div>
         
         <div className="flex items-center gap-3">
           <Button
-            onClick={() => onNavigate('crop-recommendation')}
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-md shadow-emerald-500/10 rounded-xl px-5 h-11 font-semibold text-sm"
+            onClick={() => onNavigate('soil-prediction')}
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-lg shadow-emerald-500/20 rounded-xl px-5 h-11 font-semibold text-sm transition-all hover:scale-[1.02]"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            New Recommendation
+            <TestTube className="w-4 h-4 mr-2" />
+            Scan Soil Chemistry
           </Button>
           <Button
             variant="outline"
-            onClick={() => onNavigate('reports')}
-            className="rounded-xl border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-200 h-11 text-sm font-semibold hover:bg-slate-100/50 dark:hover:bg-neutral-900/40"
+            onClick={() => onNavigate('crop-recommendation')}
+            className="rounded-xl border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-200 h-11 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-neutral-900"
           >
-            <Download className="w-4 h-4 mr-2 text-slate-400" />
-            Export Report
+            <Sprout className="w-4 h-4 mr-2 text-emerald-500" />
+            Crop Advisor
           </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiCards.map((kpi, index) => (
-          <Card key={index} className="glass-card-premium border-0 opacity-0 animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className={`p-2.5 rounded-xl bg-slate-100 dark:bg-neutral-800/80 ${kpi.color}`}>
-                  {kpi.icon}
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">{kpi.value}</p>
-                  <p className="text-[10px] font-semibold text-emerald-500 dark:text-emerald-400">{kpi.change}</p>
-                </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-1">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+                <Sprout className="w-6 h-6" />
               </div>
-              <div className="mt-4">
-                <p className="text-sm font-bold text-slate-500 dark:text-neutral-400">{kpi.title}</p>
+              <div className="text-right">
+                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">12</p>
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">+3 recommended</p>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Active Recommended Crops</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-2">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+                <MapPin className="w-6 h-6" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">50.0</p>
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Acres Managed</p>
+              </div>
+            </div>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Cultivated Farmland</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-3">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">{pendingCount}</p>
+                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400">{completedCount} completed today</p>
+              </div>
+            </div>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Pending Tasks</p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-4">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400">
+                <Activity className="w-6 h-6" />
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">88%</p>
+                <p className="text-[10px] font-bold text-teal-600 dark:text-teal-400">Optimal Fertility</p>
+              </div>
+            </div>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Soil Health Index</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Main Content Grid */}
+      {/* Main Interactive Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Tasks & Weather */}
-        <div className="lg:col-span-2 space-y-6 opacity-0 animate-fade-in-up animate-stagger-2">
+        
+        {/* Left Column (2 Cols) - Recharts Analytics & Tasks */}
+        <div className="lg:col-span-2 space-y-6">
           
-          {/* Weather Card */}
-          <Card className="glass-card-premium border-0 overflow-hidden relative bg-gradient-to-br from-blue-500/10 via-amber-500/5 to-emerald-500/5 dark:from-neutral-900/60 dark:via-blue-900/10 dark:to-neutral-900/30">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-lg">
-                <Thermometer className="w-5 h-5 text-amber-500" />
-                Weather & Sensor Overview
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  {weatherData.current.icon}
-                  <div>
-                    <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">{weatherData.current.temp}</p>
-                    <p className="text-xs font-semibold text-slate-500 dark:text-neutral-400">{weatherData.current.condition}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center gap-4 text-xs font-semibold text-slate-600 dark:text-neutral-300">
-                    <div className="flex items-center gap-1 bg-blue-50 dark:bg-blue-950/20 px-2.5 py-1.5 rounded-lg">
-                      <Droplets className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
-                      <span>{weatherData.current.humidity} Hum</span>
-                    </div>
-                    <div className="flex items-center gap-1 bg-slate-100 dark:bg-neutral-800/60 px-2.5 py-1.5 rounded-lg">
-                      <Cloud className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{weatherData.current.rainfall} Rain</span>
-                    </div>
-                  </div>
-                </div>
+          {/* Weather & Soil Telemetry Line Chart */}
+          <Card className="glass-card-premium border-0 p-1">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-emerald-500" />
+                  Weekly Soil & Climate Telemetry
+                </CardTitle>
+                <p className="text-xs text-slate-400">7-Day moisture, temperature & ambient humidity tracking</p>
               </div>
-
-              <div className="grid grid-cols-4 gap-3">
-                {weatherData.forecast.map((day) => (
-                  <div key={day.day} className="text-center p-3 rounded-xl bg-white/40 dark:bg-neutral-900/40 border border-slate-200/30 dark:border-neutral-800/30 shadow-sm">
-                    <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mb-2">{day.day}</p>
-                    <div className="flex justify-center mb-2 text-slate-500 dark:text-neutral-300">
-                      {day.icon}
-                    </div>
-                    <p className="text-sm font-extrabold text-slate-800 dark:text-white">{day.high}</p>
-                    <p className="text-[10px] font-semibold text-slate-400 dark:text-neutral-500">{day.low}</p>
-                  </div>
-                ))}
+              <Badge variant="outline" className="text-xs border-emerald-500/30 text-emerald-600">
+                Live IoT Feed
+              </Badge>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={telemetrySeries}>
+                    <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} />
+                    <RechartsTooltip 
+                      contentStyle={{ backgroundColor: '#0f172a', borderRadius: '12px', border: 'none', color: '#fff' }} 
+                    />
+                    <Line type="monotone" dataKey="moisture" name="Soil Moisture %" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                    <Line type="monotone" dataKey="temp" name="Temperature °C" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" />
+                    <Line type="monotone" dataKey="humidity" name="Humidity %" stroke="#3b82f6" strokeWidth={2} />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
 
-          {/* Upcoming Tasks */}
+          {/* Interactive Growth Schedule */}
           <Card className="glass-card-premium border-0">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-lg">
-                <Calendar className="w-5 h-5 text-emerald-500" />
-                Growth Task Schedule
-              </CardTitle>
+              <div>
+                <CardTitle className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-emerald-500" />
+                  Farm Task Schedule
+                </CardTitle>
+                <p className="text-xs text-slate-400">Click checkmark to toggle task completion status</p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onNavigate('growth-calendar')}
-                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 rounded-lg"
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-xl"
               >
-                View Calendar
+                Calendar View
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {upcomingTasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-white/40 dark:bg-neutral-900/40 border border-slate-200/20 dark:border-neutral-800/20 hover:border-emerald-500/25 hover:shadow-md transition-all duration-300">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`w-2 h-2 rounded-full animate-pulse ${
-                        task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-amber-500' : 'bg-emerald-500'
-                      }`} />
-                      <h4 className="font-bold text-sm text-slate-800 dark:text-white">{task.task}</h4>
-                      <Badge className={`text-[9px] font-extrabold tracking-wider px-2 py-0.5 border rounded-full ${
-                        task.priority === 'high' ? 'bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border-red-200/40' :
-                        task.priority === 'medium' ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/40' :
-                        'bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-200/40'
-                      }`}>
-                        {task.priority}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-neutral-500 mt-1.5 font-medium">
-                      <span>Due: {task.date}</span>
-                      <span>Crop Target: <strong className="text-slate-500 dark:text-neutral-400">{task.crop}</strong></span>
+              {tasks.map((t) => (
+                <div 
+                  key={t.id} 
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${
+                    t.status === 'completed' 
+                      ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/30 opacity-70' 
+                      : 'bg-white/60 dark:bg-neutral-900/60 border-slate-200/50 dark:border-neutral-800/50 hover:border-emerald-500/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggleTaskCompletion(t.id)}
+                      className={`w-7 h-7 rounded-xl flex items-center justify-center transition-colors ${
+                        t.status === 'completed' 
+                          ? 'bg-emerald-500 text-white' 
+                          : 'border-2 border-slate-300 dark:border-neutral-700 hover:border-emerald-500 text-transparent'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                    </button>
+                    <div>
+                      <h4 className={`font-bold text-sm ${t.status === 'completed' ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}`}>
+                        {t.task}
+                      </h4>
+                      <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                        Due: {t.date} • Crop: <strong className="text-slate-600 dark:text-neutral-300">{t.crop}</strong>
+                      </p>
                     </div>
                   </div>
-                  <Button size="sm" variant="ghost" className="text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-neutral-800 rounded-lg">
-                    <CheckCircle className="w-5 h-5" />
-                  </Button>
+                  <Badge className={`text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full ${
+                    t.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400' :
+                    t.priority === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400' :
+                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                  }`}>
+                    {t.priority}
+                  </Badge>
                 </div>
               ))}
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column - Progress & Activity */}
-        <div className="space-y-6 opacity-0 animate-fade-in-up animate-stagger-3">
-          {/* Crop Progress */}
+        {/* Right Column (1 Col) - Radar Chart & Crop Stages */}
+        <div className="space-y-6">
+          
+          {/* NPK Nutrient Radar Balance Chart */}
           <Card className="glass-card-premium border-0">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-lg">
-                <BarChart3 className="w-5 h-5 text-emerald-500" />
-                Active Crop Development
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Layers className="w-5 h-5 text-emerald-500" />
+                Soil NPK Chemistry Balance
+              </CardTitle>
+              <p className="text-xs text-slate-400">Nutrient profile diagnostic rating</p>
+            </CardHeader>
+            <CardContent className="pt-2">
+              <div className="h-56 w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={npkRadarData}>
+                    <PolarGrid stroke="#475569" strokeDasharray="3 3" />
+                    <PolarAngleAxis dataKey="subject" stroke="#94a3b8" fontSize={10} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#475569" fontSize={9} />
+                    <Radar name="Soil Rating" dataKey="value" stroke="#10b981" fill="#10b981" fillOpacity={0.4} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Active Crop Development Progress */}
+          <Card className="glass-card-premium border-0">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-teal-500" />
+                Crop Growth Milestones
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4.5">
-              {cropProgress.map((crop) => (
-                <div key={crop.name} className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="font-bold text-slate-800 dark:text-white">{crop.name}</p>
-                      <p className="text-[10px] text-slate-400 font-semibold">{crop.stage} • {crop.acres} acres</p>
-                    </div>
-                    <Badge className={`text-[10px] font-extrabold uppercase bg-transparent border border-current px-2.5 rounded-full ${getStatusColor(crop.status)}`}>
-                      {crop.status}
-                    </Badge>
+            <CardContent className="space-y-4">
+              {cropProgress.map((c) => (
+                <div key={c.name} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="text-slate-800 dark:text-white font-bold">{c.name}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">{c.progress}%</span>
                   </div>
-                  <div className="relative pt-1">
-                    <Progress value={crop.progress} className="h-2 bg-slate-100 dark:bg-neutral-800" />
-                  </div>
-                  <p className="text-[10px] font-bold text-slate-500 dark:text-neutral-400 text-right">{crop.progress}% complete</p>
+                  <Progress value={c.progress} className="h-2 bg-slate-100 dark:bg-neutral-800" />
+                  <p className="text-[10px] text-slate-400 flex items-center justify-between">
+                    <span>{c.stage}</span>
+                    <span>{c.acres} Acres</span>
+                  </p>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          {/* Recent Activity */}
-          <Card className="glass-card-premium border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-slate-800 dark:text-white font-bold text-lg">Telemetry Logs</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3.5">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-neutral-800/40 transition-colors">
-                  <div className="mt-0.5 p-1 rounded-lg bg-slate-100 dark:bg-neutral-800">
-                    {activity.icon}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-bold text-slate-700 dark:text-neutral-200">{activity.action}</p>
-                    <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
+          {/* Direct AI Adviser CTA */}
+          <Card className="glass-card-premium border-0 bg-gradient-to-br from-emerald-500/10 to-teal-600/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-md">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-extrabold text-sm text-slate-800 dark:text-white">Ask AgriSol AI Adviser</h4>
+                <p className="text-xs text-slate-500 dark:text-neutral-400">Get instant agronomic solutions 24/7</p>
+              </div>
+            </div>
+            <Button
+              onClick={() => onNavigate('chatbot')}
+              className="w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold h-9"
+            >
+              Start AI Chat
+            </Button>
           </Card>
 
-          {/* Quick Actions */}
-          <Card className="glass-card-premium border-0">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-slate-800 dark:text-white font-bold text-lg">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                variant="outline"
-                className="w-full justify-start h-12 text-sm font-semibold rounded-xl border border-slate-200/60 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-900/60"
-                onClick={() => onNavigate('soil-prediction')}
-              >
-                <div className="w-7 h-7 bg-blue-50 dark:bg-blue-950/20 rounded-lg flex items-center justify-center mr-3 text-blue-500">
-                  <TestTube className="w-4 h-4" />
-                </div>
-                Scan Soil Chemistry
-              </Button>
-              
-              <Button
-                variant="outline"
-                className="w-full justify-start h-12 text-sm font-semibold rounded-xl border border-slate-200/60 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-900/60"
-                onClick={() => onNavigate('plant-explorer')}
-              >
-                <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg flex items-center justify-center mr-3 text-emerald-500">
-                  <Sprout className="w-4 h-4" />
-                </div>
-                Explore Crop Types
-              </Button>
-              
-              <Button
-                variant="outline"
-                className="w-full justify-start h-12 text-sm font-semibold rounded-xl border border-slate-200/60 dark:border-neutral-800 hover:bg-slate-50 dark:hover:bg-neutral-900/60"
-                onClick={() => onNavigate('chatbot')}
-              >
-                <div className="w-7 h-7 bg-amber-50 dark:bg-amber-950/20 rounded-lg flex items-center justify-center mr-3 text-amber-500">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                Consult Farm AI Chat
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </div>

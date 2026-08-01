@@ -12,7 +12,8 @@ import {
   Sprout,
   Scissors,
   AlertCircle,
-  CheckCircle
+  CheckCircle2,
+  CalendarCheck
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -28,14 +29,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 interface GrowthCalendarProps {
   onNavigate: (page: string, data?: any) => void;
   navigationData?: any;
-  userRole: 'farmer' | 'admin';
+  userRole?: 'farmer' | 'admin';
 }
 
 const calendarActivities = [
   {
     id: 1,
     title: 'Sow Rice Seeds - Field A',
-    date: new Date(2024, 2, 15),
+    date: new Date(2026, 7, 3),
     type: 'sowing',
     crop: 'Rice',
     field: 'Field A',
@@ -47,11 +48,11 @@ const calendarActivities = [
   {
     id: 2,
     title: 'First Irrigation - Field A',
-    date: new Date(2024, 2, 20),
+    date: new Date(2026, 7, 5),
     type: 'irrigation',
     crop: 'Rice',
     field: 'Field A',
-    status: 'completed',
+    status: 'scheduled',
     priority: 'medium',
     notes: 'Maintained 2-3 cm water level',
     duration: '4 hours'

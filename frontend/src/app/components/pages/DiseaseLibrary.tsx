@@ -1,32 +1,28 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
+  Bug, 
   Search, 
   Filter, 
-  Bug, 
+  Upload, 
+  Camera, 
   AlertTriangle, 
-  Shield, 
-  Eye,
-  BookOpen,
-  Video,
-  ChevronRight,
-  Leaf,
-  Sprout,
-  Camera,
-  Info
+  ShieldCheck, 
+  Stethoscope, 
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  X,
+  FileImage,
+  Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Alert, AlertDescription } from '../ui/alert';
-import { ImageWithFallback } from '../shared/ImageWithFallback';
 
 interface DiseaseLibraryProps {
   onNavigate: (page: string, data?: any) => void;
-  navigationData?: any;
-  userRole: 'farmer' | 'admin';
 }
 
 const diseaseDatabase = [
