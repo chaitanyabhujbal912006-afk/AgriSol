@@ -56,6 +56,8 @@ router.get('/', (req, res) => {
       admin: '/api/v1/admin',
       analytics: '/api/v1/analytics',
       chat: '/api/v1/chat',
+      soil: '/api/v1/soil',
+      calendar: '/api/v1/calendar',
     },
   });
 });
