@@ -60,7 +60,7 @@ const calendarActivities = [
   {
     id: 3,
     title: 'Apply NPK Fertilizer - Field A',
-    date: new Date(2024, 2, 25),
+    date: new Date(2026, 7, 10),
     type: 'fertilizer',
     crop: 'Rice',
     field: 'Field A',
@@ -72,7 +72,7 @@ const calendarActivities = [
   {
     id: 4,
     title: 'Pest Inspection - Field B',
-    date: new Date(2024, 2, 26),
+    date: new Date(2026, 7, 15),
     type: 'inspection',
     crop: 'Tomato',
     field: 'Field B',
@@ -84,7 +84,7 @@ const calendarActivities = [
   {
     id: 5,
     title: 'Harvest Wheat - Field C',
-    date: new Date(2024, 3, 5),
+    date: new Date(2026, 7, 20),
     type: 'harvest',
     crop: 'Wheat',
     field: 'Field C',
@@ -96,7 +96,7 @@ const calendarActivities = [
   {
     id: 6,
     title: 'Weed Management - Field A',
-    date: new Date(2024, 3, 10),
+    date: new Date(2026, 7, 25),
     type: 'weeding',
     crop: 'Rice',
     field: 'Field A',
