@@ -177,18 +177,25 @@ exports.getWeatherByLocation = catchAsync(async (req, res) => {
 exports.getForecast = catchAsync(async (req, res) => {
   const { lat, lon } = req.query;
 
-  const latitude = lat || 20.5937;
-  const longitude = lon || 78.9629;
+  const latitude = lat || req.user?.coordinates?.coordinates?.[1] || 20.5937;
+  const longitude = lon || req.user?.coordinates?.coordinates?.[0] || 78.9629;
 
   const cacheKey = `weather:forecast:${parseFloat(latitude).toFixed(2)}:${parseFloat(longitude).toFixed(2)}`;
   const cached = await cache.get(cacheKey);
   if (cached) return res.json({ success: true, data: cached, cached: true });
 
-  const { current, forecast } = await fetchWeatherFromAPI(latitude, longitude);
-  const weatherData = parseWeatherData(current, forecast);
+  let forecastData;
+  try {
+    const { current, forecast } = await fetchWeatherFromAPI(latitude, longitude);
+    const weatherData = parseWeatherData(current, forecast);
+    forecastData = weatherData.forecast;
+    await cache.set(cacheKey, forecastData, 60 * 60); // 1 hour
+  } catch (error) {
+    logger.warn('Weather forecast API error, using mock data:', error.message);
+    forecastData = getMockWeatherData().forecast;
+  }
 
-  await cache.set(cacheKey, weatherData.forecast, 60 * 60); // 1 hour
-  res.json({ success: true, data: weatherData.forecast });
+  res.json({ success: true, data: forecastData });
 });
 
 // ── Weather Alerts ────────────────────────────
@@ -254,18 +261,27 @@ exports.getFarmingCalendar = catchAsync(async (req, res) => {
   const { lat, lon, crops } = req.query;
   const cropList = crops ? crops.split(',') : req.user?.cropsGrown || [];
 
-  const cacheKey = `farming:calendar:${lat}:${lon}:${cropList.join(',')}`;
+  const latitude = lat || req.user?.coordinates?.coordinates?.[1] || 20.59;
+  const longitude = lon || req.user?.coordinates?.coordinates?.[0] || 78.96;
+
+  const cacheKey = `farming:calendar:${parseFloat(latitude).toFixed(2)}:${parseFloat(longitude).toFixed(2)}:${cropList.join(',')}`;
   const cached = await cache.get(cacheKey);
   if (cached) return res.json({ success: true, data: cached, cached: true });
 
-  const { current, forecast } = await fetchWeatherFromAPI(lat || 20.59, lon || 78.96);
-  const weather = parseWeatherData(current, forecast);
+  let weather;
+  try {
+    const { current, forecast } = await fetchWeatherFromAPI(latitude, longitude);
+    weather = parseWeatherData(current, forecast);
+  } catch (error) {
+    logger.warn('Weather API unavailable for farming calendar, using mock data:', error.message);
+    weather = getMockWeatherData();
+  }
 
   const calendar = {
-    week: forecast,
+    week: weather.forecast,
     recommendations: generateFarmingRecommendations(weather, cropList),
-    bestDaysForSpraying: forecast.filter(d => d.windSpeed < 15 && d.rainfall < 2).slice(0, 3),
-    bestDaysForIrrigation: forecast.filter(d => d.rainfall < 5 && d.humidity < 70).slice(0, 3),
+    bestDaysForSpraying: weather.forecast.filter(d => d.windSpeed < 15 && d.rainfall < 2).slice(0, 3),
+    bestDaysForIrrigation: weather.forecast.filter(d => d.rainfall < 5 && d.humidity < 70).slice(0, 3),
   };
 
   await cache.set(cacheKey, calendar, 3 * 60 * 60);

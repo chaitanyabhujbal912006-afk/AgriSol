@@ -201,11 +201,14 @@ exports.addComment = catchAsync(async (req, res) => {
 
 // ── Delete Post ───────────────────────────────
 exports.deletePost = catchAsync(async (req, res) => {
-  const post = await CommunityPost.findOne({
-    _id: req.params.id,
-    $or: [{ author: req.user._id }, { author: req.user.role === 'admin' }],
-  });
+  const isAdmin = req.user.role === 'admin';
 
+  // Admins can delete any post; owners can only delete their own
+  const query = isAdmin
+    ? { _id: req.params.id, isDeleted: false }
+    : { _id: req.params.id, author: req.user._id, isDeleted: false };
+
+  const post = await CommunityPost.findOne(query);
   if (!post) throw new AppError('Post not found or unauthorized', 404);
 
   post.isDeleted = true;
