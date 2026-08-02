@@ -92,19 +92,27 @@ export function Auth({ onNavigate }: AuthProps) {
     setIsLoading(true);
     setErrorMsg('');
     try {
+      const loginPayload = {
+        identifier: formData.email || formData.mobile,
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password
+      };
+
       const response = await fetch(`${API}/auth/signin`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password })
+        body: JSON.stringify(loginPayload)
       });
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem('agrisol_token', data.token);
-        localStorage.setItem('agrisol_user', JSON.stringify(data.user));
+        const token = data.data?.accessToken || data.token || data.accessToken;
+        const user = data.data?.user || data.user;
+        localStorage.setItem('agrisol_token', token);
+        localStorage.setItem('agrisol_user', JSON.stringify(user));
         onNavigate('dashboard');
       } else if (data.requiresVerification) {
-        // Unverified account — redirect to OTP screen
         setAuthStep('verify');
         startResendCooldown();
       } else {
@@ -135,8 +143,11 @@ export function Auth({ onNavigate }: AuthProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`.trim() || 'Farmer',
+          mobile: formData.mobile || '9876543210',
           email: formData.email,
           password: formData.password,
+          state: formData.state || 'Maharashtra',
         })
       });
       const data = await response.json();
@@ -169,17 +180,18 @@ export function Auth({ onNavigate }: AuthProps) {
       const response = await fetch(`${API}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, otp })
+        body: JSON.stringify({ mobile: formData.mobile, email: formData.email, otp })
       });
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem('agrisol_token', data.token);
-        localStorage.setItem('agrisol_user', JSON.stringify(data.user));
+        const token = data.data?.accessToken || data.token || data.accessToken;
+        const user = data.data?.user || data.user;
+        localStorage.setItem('agrisol_token', token);
+        localStorage.setItem('agrisol_user', JSON.stringify(user));
         setAuthStep('role');
       } else {
         setErrorMsg(data.message || 'Invalid code. Please try again.');
-        // Clear OTP fields on failure
         setOtpCode(['', '', '', '', '', '']);
         document.getElementById('otp-0')?.focus();
       }
