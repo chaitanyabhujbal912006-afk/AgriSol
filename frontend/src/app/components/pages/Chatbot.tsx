@@ -53,7 +53,7 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
-
+  const [language, setLanguage] = useState('English');
   const toggleVoiceListen = () => {
     setIsListening(!isListening);
     if (!isListening) {
