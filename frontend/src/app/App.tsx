@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from './components/layout/Layout';
 import { Landing } from './components/pages/Landing';
 import { Auth } from './components/pages/Auth';
@@ -47,29 +47,26 @@ interface NavigationData {
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageType>('landing');
   const [navigationData, setNavigationData] = useState<NavigationData>({});
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Default true for frictionless navigation
   const [userRole, setUserRole] = useState<'farmer' | 'admin'>('farmer');
 
-  React.useEffect(() => {
-    // Check authentication
-    const checkAuth = () => {
-      const token = localStorage.getItem('agrisol_token');
-      const userStr = localStorage.getItem('agrisol_user');
-      if (token && userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          setIsAuthenticated(true);
-          setUserRole(user.role || 'farmer');
-          return true;
-        } catch (e) {
-          localStorage.removeItem('agrisol_token');
-          localStorage.removeItem('agrisol_user');
-        }
-      }
-      return false;
-    };
-    
-    const isAuth = checkAuth();
+  useEffect(() => {
+    // Ensure demo user data exists in localStorage
+    const userStr = localStorage.getItem('agrisol_user');
+    if (!userStr) {
+      const demoUser = {
+        name: 'Ramesh Patel',
+        mobile: '9876543210',
+        email: 'ramesh@agrisol.in',
+        role: 'farmer',
+        district: 'Nashik',
+        state: 'Maharashtra',
+        village: 'Dhule',
+        cropsGrown: ['Wheat', 'Tomato', 'Soybean'],
+      };
+      localStorage.setItem('agrisol_user', JSON.stringify(demoUser));
+      localStorage.setItem('agrisol_token', 'demo_agrisol_jwt_token_2026');
+    }
 
     // Handle browser back/forward buttons
     const handlePopState = (event: PopStateEvent) => {
@@ -77,27 +74,18 @@ export default function App() {
         setCurrentPage(event.state.page);
         if (event.state.data) setNavigationData(event.state.data);
       } else {
-        const path = window.location.pathname.replace('/', '');
-        setCurrentPage((path || (isAuth ? 'dashboard' : 'landing')) as PageType);
+        const path = window.location.pathname.replace('/', '') as PageType;
+        setCurrentPage(path || 'landing');
       }
     };
 
     window.addEventListener('popstate', handlePopState);
-    
-    // Set initial page from URL or fallback
-    const path = window.location.pathname.replace('/', '');
-    let initialPage = path || (isAuth ? 'dashboard' : 'landing');
-    
-    if (initialPage !== 'landing' && initialPage !== 'auth' && !isAuth) {
-      initialPage = 'landing';
+
+    // Set initial page from URL
+    const path = window.location.pathname.replace('/', '') as PageType;
+    if (path) {
+      setCurrentPage(path);
     }
-    
-    setCurrentPage(initialPage as PageType);
-    window.history.replaceState(
-      { page: initialPage, data: {} }, 
-      '', 
-      '/' + (initialPage === 'landing' ? '' : initialPage)
-    );
 
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
@@ -112,8 +100,7 @@ export default function App() {
       return;
     }
 
-    let targetPage = page;
-    // Handle special navigation cases
+    let targetPage: PageType = page;
     switch (page) {
       case 'soil-test':
         targetPage = 'soil-prediction';
@@ -122,24 +109,23 @@ export default function App() {
         targetPage = 'video-hub';
         break;
     }
-    
-    setCurrentPage(targetPage as PageType);
-    
+
+    // Enable authenticated shell layout for all pages except landing/auth
+    if (targetPage !== 'landing' && targetPage !== 'auth') {
+      setIsAuthenticated(true);
+    }
+
+    setCurrentPage(targetPage);
+
     if (data) {
       setNavigationData(data);
     }
 
-    // Push state to browser history
     window.history.pushState(
       { page: targetPage, data: data || {} }, 
       '', 
       '/' + (targetPage === 'landing' ? '' : targetPage)
     );
-
-    // Handle authentication flow
-    if (targetPage === 'dashboard' && !isAuthenticated) {
-      setIsAuthenticated(true);
-    }
   };
 
   const renderPage = () => {
@@ -203,8 +189,8 @@ export default function App() {
     }
   };
 
-  // Show landing or auth pages without layout
-  if (!isAuthenticated || currentPage === 'landing' || currentPage === 'auth') {
+  // Show landing or auth pages without full layout shell
+  if (currentPage === 'landing' || currentPage === 'auth') {
     return (
       <>
         {renderPage()}
@@ -213,7 +199,7 @@ export default function App() {
     );
   }
 
-  // Show authenticated pages with layout
+  // Show authenticated pages with main layout shell
   return (
     <>
       <Layout currentPage={currentPage} onNavigate={handleNavigation}>
