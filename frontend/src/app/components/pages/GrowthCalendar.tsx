@@ -185,10 +185,22 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
     }))
   ];
 
-  const getActivitiesForDate = (date: Date) => {
-    return allActivities.filter(activity => 
-      activity.date.toDateString() === date.toDateString()
-    );
+  const handlePrevMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const getActivitiesForDate = (date?: Date) => {
+    if (!date || isNaN(date.getTime())) return [];
+    return allActivities.filter(activity => {
+      if (!activity.date || isNaN(activity.date.getTime())) return false;
+      return activity.date.getFullYear() === date.getFullYear() &&
+             activity.date.getMonth() === date.getMonth() &&
+             activity.date.getDate() === date.getDate();
+    });
   };
 
   const getStatusColor = (status: string) => {
@@ -427,14 +439,14 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))}
+                      onClick={handlePrevMonth}
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))}
+                      onClick={handleNextMonth}
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>
