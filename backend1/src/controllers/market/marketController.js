@@ -217,55 +217,117 @@ exports.searchCrops = catchAsync(async (req, res) => {
   const { q } = req.query;
   if (!q || q.length < 2) throw new AppError('Search query too short', 400);
 
-  const crops = await MarketPrice.distinct('cropName', {
+  // Common Indian crops — static fallback if DB has no seeded data
+  const KNOWN_CROPS = [
+    'Wheat', 'Rice', 'Paddy', 'Maize', 'Sorghum', 'Bajra', 'Jowar',
+    'Soybean', 'Cotton', 'Groundnut', 'Sunflower', 'Mustard', 'Linseed',
+    'Onion', 'Tomato', 'Potato', 'Brinjal', 'Cauliflower', 'Cabbage',
+    'Chilli', 'Garlic', 'Ginger', 'Turmeric', 'Coriander', 'Fenugreek',
+    'Sugarcane', 'Banana', 'Mango', 'Grapes', 'Pomegranate', 'Orange',
+    'Tur Dal', 'Moong Dal', 'Chana', 'Urad Dal', 'Masoor Dal', 'Rajma',
+    'Jowar', 'Ragi', 'Barley', 'Amaranth',
+  ];
+
+  // Query DB first
+  const dbCrops = await MarketPrice.distinct('cropName', {
     cropName: new RegExp(q, 'i'),
   });
 
-  res.json({ success: true, data: crops.slice(0, 20) });
+  // Merge DB results with static list (DB results first)
+  const staticMatches = KNOWN_CROPS
+    .filter(c => c.toLowerCase().includes(q.toLowerCase()))
+    .filter(c => !dbCrops.some(d => d.toLowerCase() === c.toLowerCase()));
+
+  const allCrops = [...dbCrops, ...staticMatches].slice(0, 20);
+  res.json({ success: true, data: allCrops, total: allCrops.length });
 });
 
 // ── Seed Market Prices (Admin) ────────────────
 exports.seedMarketPrices = catchAsync(async (req, res) => {
-  // For demo: seed some sample prices
   const sampleCrops = [
-    { name: 'Wheat', nameHi: 'गेहूं' },
-    { name: 'Rice', nameHi: 'चावल' },
-    { name: 'Soybean', nameHi: 'सोयाबीन' },
-    { name: 'Cotton', nameHi: 'कपास' },
-    { name: 'Onion', nameHi: 'प्याज' },
-    { name: 'Tomato', nameHi: 'टमाटर' },
-    { name: 'Potato', nameHi: 'आलू' },
+    { name: 'Wheat',      nameHi: 'गेहूं',    base: 2200 },
+    { name: 'Rice',       nameHi: 'चावल',    base: 3200 },
+    { name: 'Paddy',      nameHi: 'धान',     base: 2100 },
+    { name: 'Soybean',    nameHi: 'सोयाबीन', base: 5000 },
+    { name: 'Cotton',     nameHi: 'कपास',    base: 7000 },
+    { name: 'Onion',      nameHi: 'प्याज',   base: 1800 },
+    { name: 'Tomato',     nameHi: 'टमाटर',  base: 2500 },
+    { name: 'Potato',     nameHi: 'आलू',    base: 1200 },
+    { name: 'Maize',      nameHi: 'मक्का',   base: 1900 },
+    { name: 'Groundnut',  nameHi: 'मूंगफली', base: 5500 },
+    { name: 'Sugarcane',  nameHi: 'गन्ना',   base: 3500 },
+    { name: 'Tur Dal',    nameHi: 'तुअर दाल', base: 7200 },
   ];
 
   const markets = [
-    { name: 'Pune APMC', district: 'Pune', state: 'Maharashtra' },
-    { name: 'Nashik APMC', district: 'Nashik', state: 'Maharashtra' },
-    { name: 'Nagpur APMC', district: 'Nagpur', state: 'Maharashtra' },
+    // Maharashtra
+    { name: 'Pune APMC',    district: 'Pune',     state: 'Maharashtra' },
+    { name: 'Nashik APMC',  district: 'Nashik',   state: 'Maharashtra' },
+    { name: 'Nagpur APMC',  district: 'Nagpur',   state: 'Maharashtra' },
+    { name: 'Aurangabad APMC', district: 'Aurangabad', state: 'Maharashtra' },
+    // Madhya Pradesh
+    { name: 'Indore APMC',  district: 'Indore',   state: 'Madhya Pradesh' },
+    { name: 'Bhopal APMC',  district: 'Bhopal',   state: 'Madhya Pradesh' },
+    // Punjab
+    { name: 'Ludhiana Mandi', district: 'Ludhiana', state: 'Punjab' },
+    { name: 'Amritsar Mandi', district: 'Amritsar', state: 'Punjab' },
+    // Uttar Pradesh
+    { name: 'Lucknow Mandi', district: 'Lucknow',  state: 'Uttar Pradesh' },
+    { name: 'Kanpur Mandi',  district: 'Kanpur',   state: 'Uttar Pradesh' },
+    // Rajasthan
+    { name: 'Jaipur Mandi',  district: 'Jaipur',   state: 'Rajasthan' },
+    { name: 'Jodhpur Mandi', district: 'Jodhpur',  state: 'Rajasthan' },
   ];
 
   const prices = [];
-  for (let day = 0; day < 30; day++) {
+  const DAYS = 45; // 45 days of data
+
+  for (let day = 0; day < DAYS; day++) {
     const date = new Date(Date.now() - day * 24 * 60 * 60 * 1000);
+    date.setHours(0, 0, 0, 0);
+
     for (const crop of sampleCrops) {
       for (const market of markets) {
-        const basePrice = { Wheat: 2200, Rice: 3200, Soybean: 5000, Cotton: 7000, Onion: 1800, Tomato: 2500, Potato: 1200 }[crop.name];
-        const noise = (Math.random() - 0.5) * basePrice * 0.1;
+        // Apply regional price variation (±15% by state)
+        const stateMultiplier = {
+          'Maharashtra': 1.05, 'Madhya Pradesh': 0.97,
+          'Punjab': 1.10, 'Uttar Pradesh': 0.95, 'Rajasthan': 0.98,
+        }[market.state] || 1.0;
+
+        const base = crop.base * stateMultiplier;
+        // Random daily noise (±8%)
+        const noise = (Math.random() - 0.5) * base * 0.16;
+        const modal = Math.round(base + noise);
+
         prices.push({
           cropName: crop.name,
           cropNameHi: crop.nameHi,
           market,
           price: {
-            min: Math.round(basePrice + noise - 100),
-            modal: Math.round(basePrice + noise),
-            max: Math.round(basePrice + noise + 150),
+            min: Math.round(modal * 0.93),
+            modal,
+            max: Math.round(modal * 1.07),
           },
-          arrivals: { quantity: Math.round(Math.random() * 500 + 50) },
+          unit: 'quintal',
+          arrivals: {
+            quantity: Math.round(Math.random() * 800 + 100),
+            unit: 'tonnes',
+          },
           priceDate: date,
+          source: 'seeded',
         });
       }
     }
   }
 
   await MarketPrice.insertMany(prices, { ordered: false }).catch(() => {});
-  res.json({ success: true, message: `Seeded ${prices.length} market price records` });
+  res.json({
+    success: true,
+    message: `Seeded ${prices.length} market price records`,
+    details: {
+      crops: sampleCrops.length,
+      markets: markets.length,
+      days: DAYS,
+    },
+  });
 });
