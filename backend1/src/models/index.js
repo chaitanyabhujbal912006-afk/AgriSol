@@ -81,6 +81,7 @@ const diseaseReportSchema = new mongoose.Schema({
 diseaseReportSchema.index({ farmer: 1, createdAt: -1 });
 diseaseReportSchema.index({ 'location.state': 1, 'location.district': 1 });
 diseaseReportSchema.index({ cropName: 1, 'aiAnalysis.status': 1 });
+diseaseReportSchema.plugin(mongoosePaginate);
 
 // ── Market Price ───────────────────────────────
 const marketPriceSchema = new mongoose.Schema({
@@ -246,6 +247,7 @@ communityPostSchema.index({ createdAt: -1 });
 communityPostSchema.index({ tags: 1 });
 communityPostSchema.index({ cropTags: 1 });
 communityPostSchema.index({ category: 1, isDeleted: 1 });
+communityPostSchema.plugin(mongoosePaginate);
 
 // ── Chat Message ───────────────────────────────
 const chatMessageSchema = new mongoose.Schema({

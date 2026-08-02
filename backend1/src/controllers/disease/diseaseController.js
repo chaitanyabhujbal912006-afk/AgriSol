@@ -3,14 +3,15 @@
  * AI-powered crop disease analysis
  */
 
-const axios = require('axios');
 const { DiseaseReport } = require('../../models/index');
 const { uploadToCloudinary } = require('../../services/uploadService');
 const { cache } = require('../../config/redis');
 const AppError = require('../../utils/AppError');
 const catchAsync = require('../../utils/catchAsync');
 const logger = require('../../utils/logger');
-const diseaseQueue = require('../../jobs/diseaseDetectionQueue');
+const { callAIService } = require('../../services/aiService');
+// NOTE: diseaseQueue is required lazily to avoid circular dependency
+const getDiseaseQueue = () => require('../../jobs/diseaseDetectionQueue');
 
 // ── Submit Disease Report ─────────────────────
 exports.submitReport = catchAsync(async (req, res) => {
@@ -47,18 +48,46 @@ exports.submitReport = catchAsync(async (req, res) => {
     aiAnalysis: { status: 'pending' },
   });
 
-  // Queue AI processing (async, non-blocking)
-  await diseaseQueue.add('analyze', {
-    reportId: report._id.toString(),
-    images: uploadedImages.map(i => i.url),
-    cropName,
-    userId: req.user._id.toString(),
-    language: req.user.preferredLanguage,
-  }, {
-    attempts: 3,
-    backoff: { type: 'exponential', delay: 5000 },
-    priority: 2,
-  });
+  // Queue AI processing (async, non-blocking) — uses lazy require to avoid circular dep
+  try {
+    const diseaseQueue = getDiseaseQueue();
+    await diseaseQueue.add('analyze', {
+      reportId: report._id.toString(),
+      images: uploadedImages.map(i => i.url),
+      cropName,
+      userId: req.user._id.toString(),
+      language: req.user.preferredLanguage,
+    }, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      priority: 2,
+    });
+  } catch (queueErr) {
+    logger.warn('Disease queue unavailable — processing inline (Redis not configured)');
+    // Process inline (synchronous fallback without Bull/Redis)
+    const { callAIService: aiCall } = require('../../services/aiService');
+    const aiResult = await aiCall(uploadedImages.map(i => i.url), cropName);
+    const detections = (aiResult.detections || []).map(d => ({
+      diseaseName: d.disease_name,
+      diseaseNameHi: d.disease_name_hi,
+      diseaseNameMr: d.disease_name_mr,
+      confidence: d.confidence,
+      severity: d.severity,
+      affectedArea: d.affected_area,
+      description: d.description,
+      remedies: d.remedies || [],
+      recommendedPesticides: d.recommended_pesticides || [],
+      organicRemedies: d.organic_remedies || [],
+      preventionTips: d.prevention_tips || [],
+    }));
+    await DiseaseReport.findByIdAndUpdate(report._id, {
+      status: 'completed',
+      'aiAnalysis.status': 'completed',
+      'aiAnalysis.modelVersion': aiResult.model_version,
+      'aiAnalysis.processedAt': new Date(),
+      'aiAnalysis.detections': detections,
+    });
+  }
 
   logger.info(`Disease report submitted: ${report._id} for crop: ${cropName}`);
 
@@ -105,85 +134,8 @@ exports.getMyReports = catchAsync(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
-// ── AI Service Integration ────────────────────
-exports.callAIService = async (imageUrls, cropName) => {
-  try {
-    const response = await axios.post(
-      `${process.env.AI_SERVICE_URL}/api/detect`,
-      {
-        images: imageUrls,
-        crop_name: cropName,
-        model_version: process.env.AI_MODEL_VERSION || 'v1.0',
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.AI_SERVICE_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 60000, // 60s timeout
-      }
-    );
-    return response.data;
-  } catch (error) {
-    logger.error('AI service error:', error.message);
-
-    // Return mock response if AI service unavailable (dev/demo mode)
-    if (process.env.NODE_ENV !== 'production') {
-      return getMockAIResponse(cropName);
-    }
-    throw error;
-  }
-};
-
-// ── Mock AI Response (placeholder) ───────────
-const getMockAIResponse = (cropName) => ({
-  status: 'success',
-  model_version: 'v1.0-mock',
-  detections: [
-    {
-      disease_name: 'Leaf Blight',
-      disease_name_hi: 'पत्ती का अंगमारी',
-      disease_name_mr: 'पानांचा करपा',
-      confidence: 87.3,
-      severity: 'medium',
-      affected_area: '30-40%',
-      description: `A fungal disease affecting ${cropName} crops, causing browning and wilting of leaves.`,
-      remedies: [
-        'Remove and destroy affected plant parts',
-        'Improve air circulation between plants',
-        'Avoid overhead irrigation',
-        'Apply copper-based fungicide',
-      ],
-      recommended_pesticides: [
-        {
-          name: 'Mancozeb 75% WP',
-          dosage: '2.5g per liter of water',
-          application_method: 'Foliar spray',
-          safety_period: '7 days before harvest',
-          cost: '₹150-200 per kg',
-        },
-        {
-          name: 'Copper Oxychloride 50% WP',
-          dosage: '3g per liter of water',
-          application_method: 'Foliar spray',
-          safety_period: '10 days before harvest',
-          cost: '₹100-150 per kg',
-        },
-      ],
-      organic_remedies: [
-        'Neem oil spray (5ml per liter)',
-        'Trichoderma-based biocontrol',
-        'Garlic-chili extract spray',
-      ],
-      prevention_tips: [
-        'Use disease-resistant varieties',
-        'Maintain proper plant spacing',
-        'Crop rotation every 2-3 seasons',
-        'Regular field scouting',
-      ],
-    },
-  ],
-});
+// callAIService is now in services/aiService.js — exported here for backward compat
+exports.callAIService = callAIService;
 
 // ── Feedback on Report ────────────────────────
 exports.submitFeedback = catchAsync(async (req, res) => {

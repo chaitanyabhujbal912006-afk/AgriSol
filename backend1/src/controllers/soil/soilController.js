@@ -38,7 +38,9 @@ exports.analyzeSoil = catchAsync(async (req, res) => {
     salinity: 'Low'
   };
 
-  const imageUrl = file ? `/uploads/${file.filename}` : 'demo-sample.jpg';
+  const imageUrl = file
+    ? `uploads/${Date.now()}-${file.originalname}`
+    : 'demo-sample.jpg';
 
   const savedRecord = await SoilAnalysis.create({
     farmer: userId,

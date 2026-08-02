@@ -1,30 +1,18 @@
 /**
  * Disease Detection Queue
- * Background job processing with Bull
+ * Background job processing with Bull (requires Redis).
+ * Falls back gracefully (exports a stub) when Redis is unavailable.
  */
 
-const Bull = require('bull');
 const { DiseaseReport } = require('../models/index');
-const { callAIService } = require('../controllers/disease/diseaseController');
+const { callAIService } = require('../services/aiService');
 const { emitDiseaseResult } = require('../sockets');
 const { sendNotification } = require('../services/notifications/notificationService');
 const logger = require('../utils/logger');
 
-const diseaseQueue = new Bull('disease-detection', {
-  redis: {
-    host: process.env.BULL_REDIS_HOST || 'localhost',
-    port: parseInt(process.env.BULL_REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD || undefined,
-  },
-  defaultJobOptions: {
-    removeOnComplete: 100,
-    removeOnFail: 50,
-  },
-});
-
-// ── Process Jobs ──────────────────────────────
-diseaseQueue.process('analyze', 3, async (job) => {
-  const { reportId, images, cropName, userId, language } = job.data;
+// ── Job processor function (shared by both Bull and fallback) ──────────────
+const processAnalysis = async (data) => {
+  const { reportId, images, cropName, userId } = data;
   logger.info(`Processing disease detection job: ${reportId}`);
 
   // Update status to processing
@@ -33,17 +21,11 @@ diseaseQueue.process('analyze', 3, async (job) => {
     'aiAnalysis.status': 'processing',
   });
 
-  // Emit progress to WebSocket
   emitDiseaseResult(reportId, { status: 'processing', progress: 30 });
 
-  job.progress(30);
-
   try {
-    // Call AI service
     const aiResult = await callAIService(images, cropName);
-    job.progress(80);
 
-    // Parse and store results
     const detections = (aiResult.detections || []).map(d => ({
       diseaseName: d.disease_name,
       diseaseNameHi: d.disease_name_hi,
@@ -67,16 +49,9 @@ diseaseQueue.process('analyze', 3, async (job) => {
       'aiAnalysis.rawResponse': aiResult,
     });
 
-    job.progress(100);
+    emitDiseaseResult(reportId, { status: 'completed', detections, reportId });
 
-    // Emit result to WebSocket
-    emitDiseaseResult(reportId, {
-      status: 'completed',
-      detections,
-      reportId,
-    });
-
-    // Send push notification
+    // Send push notification for top detected disease
     const topDisease = detections[0];
     if (topDisease) {
       await sendNotification(userId, {
@@ -107,19 +82,82 @@ diseaseQueue.process('analyze', 3, async (job) => {
 
     throw error;
   }
-});
+};
 
-// ── Queue Events ──────────────────────────────
-diseaseQueue.on('completed', (job, result) => {
-  logger.info(`Disease job ${job.id} completed`);
-});
+// ── Try to create a real Bull queue (requires Redis) ───────────────────────
+let diseaseQueue;
 
-diseaseQueue.on('failed', (job, err) => {
-  logger.error(`Disease job ${job.id} failed: ${err.message}`);
-});
+try {
+  const Bull = require('bull');
+  const ioredis = require('ioredis');
 
-diseaseQueue.on('stalled', (job) => {
-  logger.warn(`Disease job ${job.id} stalled`);
-});
+  // Shared ioredis connection factory to avoid multiple connections
+  const redisOpts = {
+    host: process.env.BULL_REDIS_HOST || 'localhost',
+    port: parseInt(process.env.BULL_REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+    maxRetriesPerRequest: null,
+    enableReadyCheck: false,
+    lazyConnect: true,
+  };
+
+  const createRedisClient = () => {
+    const client = new ioredis(redisOpts);
+    client.on('error', () => {}); // suppress noise when Redis not running
+    return client;
+  };
+
+  diseaseQueue = new Bull('disease-detection', {
+    createClient,
+    defaultJobOptions: {
+      removeOnComplete: 100,
+      removeOnFail: 50,
+    },
+  });
+
+  function createClient(type) {
+    return createRedisClient();
+  }
+
+  // ── Process Jobs ────────────────────────────────────────────────────────
+  diseaseQueue.process('analyze', 3, async (job) => {
+    job.progress(0);
+    const result = await processAnalysis(job.data);
+    job.progress(100);
+    return result;
+  });
+
+  // ── Queue Events ────────────────────────────────────────────────────────
+  diseaseQueue.on('completed', (job) => {
+    logger.info(`Disease job ${job.id} completed`);
+  });
+
+  diseaseQueue.on('failed', (job, err) => {
+    logger.error(`Disease job ${job.id} failed: ${err.message}`);
+  });
+
+  diseaseQueue.on('stalled', (job) => {
+    logger.warn(`Disease job ${job.id} stalled`);
+  });
+
+  diseaseQueue.on('error', (err) => {
+    logger.warn('Disease queue error (Redis likely unavailable):', err.message);
+  });
+
+  logger.info('✅ Disease detection Bull queue initialized');
+
+} catch (err) {
+  // Redis / Bull unavailable — use an in-process stub queue that runs jobs synchronously
+  logger.warn('Bull queue unavailable — using synchronous inline fallback:', err.message);
+
+  diseaseQueue = {
+    add: async (_name, data) => {
+      // Run inline without queueing
+      setImmediate(() => processAnalysis(data).catch(e => logger.error('Inline disease processing failed:', e)));
+      return { id: 'inline-' + Date.now() };
+    },
+    on: () => {}, // no-op
+  };
+}
 
 module.exports = diseaseQueue;

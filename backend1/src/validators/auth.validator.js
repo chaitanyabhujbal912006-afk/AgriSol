@@ -33,9 +33,11 @@ const registerSchema = Joi.object({
 });
 
 const loginSchema = Joi.object({
-  mobile: mobileSchema,
+  mobile: Joi.string().pattern(/^[6-9]\d{9}$/).optional(),
+  email: Joi.string().email().lowercase().optional(),
+  identifier: Joi.string().optional(), // fallback: accepts either
   password: Joi.string().required(),
-});
+}).or('mobile', 'email', 'identifier'); // at least one must be present
 
 const verifyOTPSchema = Joi.object({
   mobile: mobileSchema,

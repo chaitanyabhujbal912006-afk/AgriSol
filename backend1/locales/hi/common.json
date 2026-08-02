@@ -1,1 +1,12 @@
-{"welcome":"AgriSol में आपका स्वागत है","login_success":"लॉगिन सफल","otp_sent":"OTP भेजा गया","crop_added":"फसल जोड़ी गई"}
+﻿{
+  "welcome": "AgriSol में आपका स्वागत है",
+  "login_success": "लॉगिन सफल",
+  "logout_success": "लॉगआउट सफल",
+  "otp_sent": "आपके मोबाइल नंबर पर OTP भेजा गया",
+  "otp_verified": "मोबाइल नंबर सत्यापित",
+  "profile_updated": "प्रोफ़ाइल अपडेट हो गई",
+  "crop_added": "फसल जोड़ी गई",
+  "disease_submitted": "रोग रिपोर्ट सबमिट की गई। विश्लेषण जारी है।",
+  "unauthorized": "कृपया लॉगिन करें",
+  "server_error": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
+}

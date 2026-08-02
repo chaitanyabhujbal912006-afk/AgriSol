@@ -1,0 +1,11 @@
+﻿{
+  "invalid_id": "अमान्य ID",
+  "not_found": "संसाधन नहीं मिला",
+  "unauthorized": "प्रमाणीकरण आवश्यक है",
+  "forbidden": "पहुंच अस्वीकृत",
+  "validation_failed": "सत्यापन विफल",
+  "server_error": "आंतरिक सर्वर त्रुटि",
+  "rate_limit": "बहुत अधिक अनुरोध",
+  "invalid_otp": "अमान्य या एक्सपायर OTP",
+  "token_expired": "सत्र समाप्त, कृपया पुनः लॉगिन करें"
+}

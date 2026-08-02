@@ -1,0 +1,14 @@
+﻿{
+  "invalid_id": "Invalid ID format",
+  "not_found": "Resource not found",
+  "unauthorized": "Authentication required",
+  "forbidden": "Access denied",
+  "validation_failed": "Validation failed",
+  "duplicate_entry": "Duplicate entry",
+  "server_error": "Internal server error",
+  "rate_limit": "Too many requests, please try again later",
+  "invalid_otp": "Invalid or expired OTP",
+  "token_expired": "Session expired, please log in again",
+  "file_too_large": "File size exceeds maximum limit",
+  "invalid_file_type": "File type not allowed"
+}
