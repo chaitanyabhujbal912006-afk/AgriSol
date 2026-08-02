@@ -26,6 +26,7 @@ router.use('/auth', authRoutes);
 router.use('/farmers', farmerRoutes);
 router.use('/crops', cropRoutes);
 router.use('/disease', diseaseRoutes);
+router.use('/diseases', diseaseRoutes); // Alias
 router.use('/weather', weatherRoutes);
 router.use('/market', marketRoutes);
 router.use('/schemes', schemeRoutes);
@@ -34,6 +35,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/chat', chatRoutes);
+router.use('/chatbot', chatRoutes); // Alias
 router.use('/soil', soilRoutes);
 router.use('/calendar', calendarRoutes);
 

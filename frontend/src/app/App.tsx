@@ -13,6 +13,9 @@ import { Feedback } from './components/pages/Feedback';
 import { Reports } from './components/pages/Reports';
 import { Subscription } from './components/pages/Subscription';
 import { Chatbot } from './components/pages/Chatbot';
+import { MarketPrices } from './components/pages/MarketPrices';
+import { CommunityForum } from './components/pages/CommunityForum';
+import { GovernmentSchemes } from './components/pages/GovernmentSchemes';
 import { Toaster } from './components/ui/sonner';
 
 type PageType = 
@@ -29,6 +32,9 @@ type PageType =
   | 'reports'
   | 'subscription'
   | 'chatbot'
+  | 'market-prices'
+  | 'community-forum'
+  | 'government-schemes'
   | 'soil-test'
   | 'video-tutorials';
 
@@ -167,6 +173,15 @@ export default function App() {
       
       case 'growth-calendar':
         return <GrowthCalendar {...commonProps} />;
+
+      case 'market-prices':
+        return <MarketPrices {...commonProps} />;
+
+      case 'community-forum':
+        return <CommunityForum {...commonProps} />;
+
+      case 'government-schemes':
+        return <GovernmentSchemes {...commonProps} />;
       
       case 'video-hub':
         return <VideoHub {...commonProps} />;

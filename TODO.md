@@ -27,7 +27,20 @@
 - [x] **Exportable Telemetry Reports**:
   - Recharts farmland crop allocation Pie Chart.
   - Instant PDF printing trigger (`window.print()`).
-
+- [x] **Market Prices & APMC Mandi Intelligence**:
+  - Mandi rates table across 1,000+ APMCs with daily min, modal, and max prices.
+  - Recharts 7-day modal price trend & AI 3-day predictive forecast chart.
+  - Government Minimum Support Price (MSP) guaranteed benchmarks for 2024-25.
+  - APMC location and state filters.
+- [x] **Farmer Community & Scientist Forum**:
+  - Discussion feed with crop tags, category filters, and search.
+  - Verified Agronomist scientist answer boxes.
+  - Interactive Like and Comment toggles.
+  - Post creation modal for asking agricultural diagnostic questions.
+- [x] **Government Schemes & Subsidies Portal**:
+  - Central & State schemes repository (PM-KISAN, PMFBY, KCC, PMKSY Drip Subsidy, Soil Health Card).
+  - Eligibility and document requirements modal dialogs.
+  - Direct application portal routing links.
 ### 🔌 Backend (Node.js + Express + TypeScript + Prisma SQLite)
 - [x] **Authentication & Email OTP System**:
   - `POST /api/v1/auth/signup` — Registers user, hashes password, generates 6-digit OTP.

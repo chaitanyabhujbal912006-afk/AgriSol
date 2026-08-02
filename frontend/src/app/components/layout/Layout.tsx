@@ -26,7 +26,10 @@ import {
   Smartphone,
   ShieldCheck,
   Activity,
-  Zap
+  Zap,
+  TrendingUp,
+  Users,
+  Landmark
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -41,11 +44,14 @@ interface LayoutProps {
 
 const navigationItems = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3, path: '/dashboard' },
+  { id: 'market-prices', label: 'Market Prices', icon: TrendingUp, path: '/market-prices' },
   { id: 'crop-recommendation', label: 'Crop Recommendation', icon: Sprout, path: '/crop-recommendation' },
   { id: 'soil-prediction', label: 'Soil Prediction', icon: TestTube, path: '/soil-prediction' },
   { id: 'plant-explorer', label: 'Plant Explorer', icon: BookOpen, path: '/plant-explorer' },
   { id: 'disease-library', label: 'Disease Library', icon: Bug, path: '/disease-library' },
   { id: 'growth-calendar', label: 'Growth Calendar', icon: Calendar, path: '/growth-calendar' },
+  { id: 'community-forum', label: 'Community Forum', icon: Users, path: '/community-forum' },
+  { id: 'government-schemes', label: 'Govt Schemes', icon: Landmark, path: '/government-schemes' },
   { id: 'chatbot', label: 'AI Adviser', icon: MessageSquare, path: '/chatbot' },
   { id: 'video-hub', label: 'Video Hub', icon: Video, path: '/video-hub' },
   { id: 'feedback', label: 'Feedback', icon: FileText, path: '/feedback' },
@@ -56,13 +62,16 @@ const navigationItems = [
 
 const mobileNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+  { id: 'market-prices', label: 'Prices', icon: TrendingUp },
   { id: 'crop-recommendation', label: 'Crops', icon: Sprout },
-  { id: 'soil-prediction', label: 'Soil AI', icon: TestTube },
   { id: 'disease-library', label: 'Disease AI', icon: Bug },
-  { id: 'growth-calendar', label: 'Calendar', icon: Calendar },
+  { id: 'community-forum', label: 'Community', icon: Users },
 ];
 
 const searchCatalog = [
+  { title: 'Market Prices & Mandi Rates', category: 'Market', page: 'market-prices' },
+  { title: 'Farmer Community Forum', category: 'Community', page: 'community-forum' },
+  { title: 'PM-KISAN & Government Schemes', category: 'Subsidies', page: 'government-schemes' },
   { title: 'Soil Prediction Tool', category: 'AI Tools', page: 'soil-prediction' },
   { title: 'Crop Recommendation Engine', category: 'AI Tools', page: 'crop-recommendation' },
   { title: 'Plant Disease Identification', category: 'AI Tools', page: 'disease-library' },
