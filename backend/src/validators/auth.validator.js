@@ -5,14 +5,13 @@ const Joi = require('joi');
 
 const mobileSchema = Joi.string()
   .pattern(/^[6-9]\d{9}$/)
-  .required()
+  .optional()
   .messages({
     'string.pattern.base': 'Please provide a valid 10-digit Indian mobile number',
-    'any.required': 'Mobile number is required',
   });
 
 const registerSchema = Joi.object({
-  name: Joi.string().min(2).max(100).required().trim(),
+  name: Joi.string().min(1).max(100).optional().default('Farmer User').trim(),
   mobile: mobileSchema,
   email: Joi.string().email().lowercase().optional(),
   password: Joi.string().min(8).max(128).required().messages({
@@ -30,7 +29,7 @@ const registerSchema = Joi.object({
   }).optional(),
   cropsGrown: Joi.array().items(Joi.string()).optional(),
   role: Joi.string().valid('farmer', 'expert').default('farmer'),
-});
+}).or('mobile', 'email');
 
 const loginSchema = Joi.object({
   mobile: Joi.string().pattern(/^[6-9]\d{9}$/).optional(),
@@ -41,11 +40,12 @@ const loginSchema = Joi.object({
 
 const verifyOTPSchema = Joi.object({
   mobile: mobileSchema,
+  email: Joi.string().email().lowercase().optional(),
   otp: Joi.string().length(6).pattern(/^\d+$/).required().messages({
     'string.length': 'OTP must be 6 digits',
     'string.pattern.base': 'OTP must contain only numbers',
   }),
-});
+}).or('mobile', 'email');
 
 const resetPasswordSchema = Joi.object({
   mobile: mobileSchema,

@@ -7,10 +7,13 @@ const logger = require('../utils/logger');
 
 const connectDB = async () => {
   try {
+    // Disable command buffering so operations fail fast instead of hanging when DB is offline
+    mongoose.set('bufferCommands', false);
+
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 3000, // 3s fast timeout instead of 10s
+      socketTimeoutMS: 30000,
     });
 
     logger.info(`✅ MongoDB Connected: ${conn.connection.host}`);
