@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { 
   Bug, 
   Search, 
@@ -13,13 +13,20 @@ import {
   CheckCircle2,
   X,
   FileImage,
-  Loader2
+  Loader2,
+  BookOpen,
+  Leaf,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ImageWithFallback } from '../shared/ImageWithFallback';
 
 interface DiseaseLibraryProps {
   onNavigate: (page: string, data?: any) => void;
