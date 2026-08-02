@@ -1,4 +1,4 @@
-﻿# 🌾 AgriSol — Smart Agriculture Platform
+# 🌾 AgriSol — Smart Agriculture Platform
 
 AgriSol is an enterprise-grade digital agriculture ecosystem empowering farmers, agronomists, and agricultural researchers with AI-driven soil diagnostics, computer-vision leaf disease analysis, crop yield predictors, market price intelligence, government schemes discovery, growth calendar task schedulers, and real-time IoT telemetry.
 
@@ -19,16 +19,16 @@ AgriSol features a premium **iOS AgTech Glassmorphic Design System**:
 
 ```
 AgriSol/
-├── backend1/                   # 🔌 Primary Node.js + Express API Backend
+├── backend/                    # 🔌 Node.js + Express API Backend (MongoDB + Redis + Sockets)
 │   ├── src/
 │   │   ├── app.js              # Server entry point
 │   │   ├── config/             # MongoDB, Redis, Swagger configuration
 │   │   ├── controllers/        # Auth, Soil, Disease, Weather, Market, Community, Calendar
-│   │   ├── jobs/               # Scheduled background jobs (node-cron)
+│   │   ├── jobs/               # Scheduled background jobs (node-cron, Bull)
 │   │   ├── middleware/         # JWT auth, rate limiting, sanitization, error handlers
 │   │   ├── models/             # Mongoose schemas (User, Farm, and aggregated index)
 │   │   ├── routes/v1/          # All versioned Express routes (/api/v1/*)
-│   │   ├── services/           # Cloudinary uploads, Nodemailer, Twilio SMS
+│   │   ├── services/           # AI service caller, Cloudinary uploads, Nodemailer, Twilio SMS
 │   │   ├── sockets/            # Real-time Socket.IO notification system
 │   │   ├── utils/              # Shared utilities and helpers
 │   │   └── validators/         # Joi / express-validator schemas
@@ -51,7 +51,6 @@ AgriSol/
 │   │   ├── styles/             # Global CSS & design tokens
 │   │   └── main.tsx            # Entry point
 │   └── package.json
-└── backend/                    # 🔌 TypeScript + Prisma SQLite microservice (secondary)
 ```
 
 ---
@@ -74,7 +73,7 @@ AgriSol/
 | Drag & Drop | React DnD |
 | Notifications | Sonner |
 
-### 🔌 Backend (`backend1`)
+### 🔌 Backend (`backend`)
 
 | Category | Technology |
 |---|---|
