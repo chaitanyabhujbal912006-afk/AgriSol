@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import API_BASE_URL from '../../config/api';
 
 interface CommunityForumProps {
   onNavigate: (page: string, data?: any) => void;
@@ -102,7 +103,7 @@ export function CommunityForum({ onNavigate }: CommunityForumProps) {
 
   const fetchPosts = async () => {
     try {
-      const url = `http://localhost:5000/api/v1/community${activeCategory !== 'all' ? `?category=${activeCategory}` : ''}`;
+      const url = `${API_BASE_URL}/community${activeCategory !== 'all' ? `?category=${activeCategory}` : ''}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success && data.data?.docs?.length > 0) {

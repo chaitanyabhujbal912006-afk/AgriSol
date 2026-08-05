@@ -20,6 +20,7 @@ import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import API_BASE_URL from '../../config/api';
 
 interface GovernmentSchemesProps {
   onNavigate: (page: string, data?: any) => void;
@@ -101,7 +102,7 @@ export function GovernmentSchemes({ onNavigate }: GovernmentSchemesProps) {
 
   const fetchSchemes = async () => {
     try {
-      let url = 'http://localhost:5000/api/v1/schemes?';
+      let url = `${API_BASE_URL}/schemes?`;
       if (selectedCategory !== 'all') url += `category=${selectedCategory}&`;
       if (selectedState !== 'all') url += `state=${selectedState}`;
 

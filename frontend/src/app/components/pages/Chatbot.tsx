@@ -18,6 +18,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Avatar, AvatarFallback } from '../ui/avatar';
+import API_BASE_URL from '../../config/api';
 
 interface ChatbotProps {
   onNavigate: (page: string, data?: any) => void;
@@ -80,7 +81,7 @@ export function Chatbot({ onNavigate, navigationData }: ChatbotProps) {
 
     try {
       const token = localStorage.getItem('agrisol_token');
-      const res = await fetch('http://localhost:5000/api/v1/chatbot/message', {
+      const res = await fetch(`${API_BASE_URL}/chatbot/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

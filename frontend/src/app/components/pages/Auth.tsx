@@ -24,6 +24,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { ImageWithFallback } from '../shared/ImageWithFallback';
+import API_BASE_URL from '../../config/api';
 
 interface AuthProps {
   onNavigate: (page: string, data?: any) => void;
@@ -72,8 +73,7 @@ export function Auth({ onNavigate }: AuthProps) {
     setErrorMsg('');
   };
 
-  // Primary backend (port 5000)
-  const API = 'http://localhost:5000/api/v1';
+  const API = API_BASE_URL;
 
   const startResendCooldown = () => {
     setResendCooldown(60);

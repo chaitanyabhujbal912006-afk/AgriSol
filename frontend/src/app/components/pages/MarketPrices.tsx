@@ -32,6 +32,7 @@ import {
   AreaChart, 
   Area 
 } from 'recharts';
+import API_BASE_URL from '../../config/api';
 
 interface MarketPricesProps {
   onNavigate: (page: string, data?: any) => void;
@@ -82,7 +83,7 @@ export function MarketPrices({ onNavigate }: MarketPricesProps) {
   const fetchLatestPrices = async () => {
     setIsLoading(true);
     try {
-      const url = `http://localhost:5000/api/v1/market/prices${selectedState !== 'all' ? `?state=${selectedState}` : ''}`;
+      const url = `${API_BASE_URL}/market/prices${selectedState !== 'all' ? `?state=${selectedState}` : ''}`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success && data.data?.prices?.length > 0) {

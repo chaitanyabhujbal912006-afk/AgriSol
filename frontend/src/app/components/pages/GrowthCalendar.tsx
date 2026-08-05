@@ -25,6 +25,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import API_BASE_URL from '../../config/api';
 
 interface GrowthCalendarProps {
   onNavigate: (page: string, data?: any) => void;
@@ -151,7 +152,7 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
       const token = localStorage.getItem('agrisol_token');
       if (!token) return;
       try {
-        const res = await fetch('http://localhost:5000/api/v1/calendar/events', {
+        const res = await fetch(`${API_BASE_URL}/calendar/events`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
@@ -229,7 +230,7 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
     setIsSaving(true);
     try {
       const token = localStorage.getItem('agrisol_token');
-      const res = await fetch('http://localhost:5000/api/v1/calendar/events', {
+      const res = await fetch(`${API_BASE_URL}/calendar/events`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -267,7 +268,7 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
     setTogglingId(eventId);
     try {
       const token = localStorage.getItem('agrisol_token');
-      const res = await fetch(`http://localhost:5000/api/v1/calendar/events/${eventId}/toggle`, {
+      const res = await fetch(`${API_BASE_URL}/calendar/events/${eventId}/toggle`, {
         method: 'PATCH',
         headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
       });

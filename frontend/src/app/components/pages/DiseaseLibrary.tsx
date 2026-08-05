@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ImageWithFallback } from '../shared/ImageWithFallback';
+import API_BASE_URL from '../../config/api';
 
 interface DiseaseLibraryProps {
   onNavigate: (page: string, data?: any) => void;
@@ -221,7 +222,7 @@ export function DiseaseLibrary({ onNavigate, navigationData, userRole }: Disease
       const formData = new FormData();
       formData.append('image', file);
       const token = localStorage.getItem('agrisol_token');
-      const res = await fetch('http://localhost:5000/api/v1/diseases/diagnose', {
+      const res = await fetch(`${API_BASE_URL}/diseases/diagnose`, {
         method: 'POST',
         headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
         body: formData
