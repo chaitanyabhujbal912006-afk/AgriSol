@@ -1,56 +1,99 @@
-# 🌾 AgriSol — Smart Agriculture Platform
+# 🌾 AgriSol — Enterprise AI AgTech Ecosystem
 
-AgriSol is an enterprise-grade digital agriculture ecosystem empowering farmers, agronomists, and agricultural researchers with AI-driven soil diagnostics, computer-vision leaf disease analysis, crop yield predictors, market price intelligence, government schemes discovery, growth calendar task schedulers, and real-time IoT telemetry.
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=github-actions)](https://github.com/chaitanyabhujbal912006-afk/AgriSol)
+[![React 18](https://img.shields.io/badge/React-18.3.1-blue?style=for-the-badge&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Vite 6](https://img.shields.io/badge/Vite-6.3.5-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
+[![Tailwind CSS 4](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+AgriSol is an end-to-end, enterprise-grade digital agriculture platform designed to empower farmers, agronomists, and agricultural enterprises. Driven by AI-powered soil chemistry diagnostics, computer-vision leaf disease detection, real-time APMC Mandi market intelligence, dynamic growth schedulers, and government subsidy discovery, AgriSol bridges precision science with actionable farm operations.
+
+---
+
+## ⚡ Quick Demo & Instant Trial Mode
+
+Experience AgriSol live without manual signup. On the authentication page, use the **Instant 1-Click Trial Access** presets:
+
+- 👨‍🌾 **Demo Farmer Profile**: *Ramesh Sharma* — 5.5 Acre Durum Wheat & Nashik Red Onion farmer in Nashik, MH with automated drip irrigation telemetry.
+- 👨‍🔬 **ICAR Agronomist Profile**: *Dr. Suresh Patil* — Ph.D. in Plant Pathology (IARI Delhi), Senior ICAR Scientist & Abiotic Stress Management Expert.
+
+---
+
+## 🌟 Key Platform Modules
+
+### 🧪 AI Soil & NPK Chemistry Diagnostics
+- **Computer-Vision Radar Scan**: Upload field photos or use sample presets (Alluvial, Red Clay, Black Loam).
+- **ICAR-Standard NPK Breakdown**: Quantifies Nitrogen (N), Phosphorus (P), Potassium (K), Organic Carbon %, and pH balance.
+- **Agronomic Remediation**: Generates tailored fertilizer application recommendations to optimize yield while preventing soil acidification.
+
+### 🍃 AI Leaf Disease Identification
+- **Pathogen Detection**: Identifies fungal, bacterial, and viral infections (*Phytophthora infestans*, *Bipolaris oryzae*, *Xanthomonas*) with bounding-box visual confidence overlays.
+- **Treatment Protocols**: Provides chemical dosages (*Mancozeb 75% WP @ 2g/L*, *Azoxystrobin 23% SC*) alongside organic biological controls (*Neem oil 10,000 PPM*, *Trichoderma viride*).
+
+### 📈 APMC Mandi Intelligence & MSP Tracker
+- **1,000+ APMC Mandi Rates**: Daily minimum, modal, and maximum commodity prices across major markets (Pune, Nashik, Indore, Nagpur, Ludhiana, Jaipur, Kanpur, Latur).
+- **AI 3-Day Forecast**: Predictive price trend charts powered by historical arrival volumes.
+- **Government MSP Benchmarks**: Official 2024–25 Minimum Support Prices for guaranteed floor rate comparison.
+
+### 💰 Crop Yield & Net Profit Estimator
+- Interactive financial calculator forecasting total harvest tonnage, gross market value, input fertilizer costs, and net farm profit based on acreage and regional soil health.
+
+### 📅 Growth Calendar & Telemetry Scheduler
+- Interactive farm task manager tracking sowing, drip irrigation cycles, fertilizer top-dressing, and harvest timelines with automated completion metrics.
+
+### 🏛️ Government Schemes & Subsidies Portal
+- Filterable repository for central and state agriculture programs (PM-KISAN, PMFBY Crop Insurance, Kisan Credit Card, PMKSY 55% Drip Irrigation Subsidy) with direct application links.
+
+### 👥 Agronomist Community & AI Advisory Chatbot
+- Q&A forum with verified Agronomist answer highlights, regional crop tagging, and an AI chat assistant with voice wave visualizers.
 
 ---
 
 ## 🎨 Design System
 
-AgriSol features a premium **iOS AgTech Glassmorphic Design System**:
+AgriSol is crafted with a state-of-the-art **iOS AgTech Glassmorphic Design System**:
 
-- **Dynamic Island Telemetry Banner** — Real-time top bar with live soil moisture, air temperature, and AI model health status
-- **iPhone Glass Pill Bottom Navigation Dock** — Frosted glass floating nav with glowing emerald indicators and spring animations
-- **iPhone 16 Pro Max Preview Frame Mode** — View the full platform inside a glassmorphic iPhone container
-- **Botanical Palette** — Deep Forest Emerald (`#059669`), Vibrant Leaf Green (`#22c55e`), Harvest Amber (`#f59e0b`), and Earthy Soil Tones with dark/light mode support
+- **Dynamic Island Telemetry Banner**: Floating top status bar displaying real-time soil moisture, ambient temperature, and AI diagnostic model connectivity.
+- **Frosted Glass Navigation Dock**: Responsive bottom navigation dock with glowing emerald indicators and smooth micro-interactions.
+- **iPhone 16 Pro Max Preview Mode**: Option to inspect the entire application within an interactive 3D-styled glass mobile container.
+- **Curated Botanical Palette**: Deep Forest Emerald (`#059669`), Vibrant Leaf Green (`#22c55e`), Harvest Amber (`#f59e0b`), and Earthy Soil Tones with full dark/light theme support.
 
 ---
 
-## 📁 Project Structure
+## 📁 Repository Structure
 
 ```
 AgriSol/
-├── backend/                    # 🔌 Node.js + Express API Backend (MongoDB + Redis + Sockets)
+├── backend/                    # 🔌 Node.js + Express API Backend (TypeScript / ES6)
 │   ├── src/
-│   │   ├── app.js              # Server entry point
-│   │   ├── config/             # MongoDB, Redis, Swagger configuration
+│   │   ├── app.js              # Server entry point & middleware stack
+│   │   ├── config/             # Database, Redis, and Swagger configs
 │   │   ├── controllers/        # Auth, Soil, Disease, Weather, Market, Community, Calendar
-│   │   ├── jobs/               # Scheduled background jobs (node-cron, Bull)
-│   │   ├── middleware/         # JWT auth, rate limiting, sanitization, error handlers
-│   │   ├── models/             # Mongoose schemas (User, Farm, and aggregated index)
-│   │   ├── routes/v1/          # All versioned Express routes (/api/v1/*)
-│   │   ├── services/           # AI service caller, Cloudinary uploads, Nodemailer, Twilio SMS
-│   │   ├── sockets/            # Real-time Socket.IO notification system
-│   │   ├── utils/              # Shared utilities and helpers
-│   │   └── validators/         # Joi / express-validator schemas
-│   ├── ai-service/             # Python AI microservice integration
-│   ├── locales/                # i18n translations (English, Hindi, Marathi)
-│   ├── logs/                   # Winston rotating log files
-│   ├── scripts/                # seed.js, migrate.js, generate-docs.js
-│   ├── tests/                  # Jest + Supertest integration tests
-│   ├── Dockerfile              # Docker container definition
-│   ├── docker-compose.yml      # Multi-service Docker Compose
-│   └── package.json
-├── frontend/                   # 💻 React 18 + Vite 6 + Tailwind CSS 4 Web App
+│   │   ├── middleware/         # JWT verification, rate limiting, xss security, errors
+│   │   ├── models/             # Mongoose schemas (User, Farm, MarketPrice, Scheme, Post)
+│   │   ├── routes/v1/          # Versioned REST endpoints (/api/v1/*)
+│   │   ├── services/           # Nodemailer, Twilio, Cloudinary & AI integrations
+│   │   ├── sockets/            # Socket.IO real-time alert broadcasts
+│   │   └── utils/              # AppError class, logger, async handler wrappers
+│   ├── scripts/                # Database seed & migration tools
+│   ├── tests/                  # Jest & Supertest API integration suites
+│   └── Dockerfile              # Backend container build specification
+├── frontend/                   # 💻 React 18 + Vite 6 + Tailwind CSS 4 Application
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── components/
-│   │   │   │   ├── layout/     # iPhone AgTech Layout, Dynamic Island, Glass Dock
-│   │   │   │   ├── pages/      # 13 core pages (Dashboard, Soil, Disease, Calendar...)
-│   │   │   │   └── ui/         # Radix UI + shadcn/ui component library
-│   │   │   └── App.tsx         # Application state & router
-│   │   ├── styles/             # Global CSS & design tokens
-│   │   └── main.tsx            # Entry point
+│   │   │   │   ├── layout/     # Dynamic Island, Glass Dock, Navigation headers
+│   │   │   │   ├── pages/      # 16 Core UI modules (Dashboard, Soil, Disease, Mandi...)
+│   │   │   │   └── ui/         # Radix UI & shadcn design components
+│   │   │   └── App.tsx         # Main router & state management
+│   │   ├── styles/             # Tailwind 4 CSS variables & design tokens
+│   │   └── main.tsx            # React application entry point
+│   ├── vercel.json             # Vercel SPA routing rules
+│   ├── Dockerfile              # Multi-stage Nginx production container build
 │   └── package.json
+└── TODO.md                     # Roadmap and completed release milestones
 ```
 
 ---
@@ -58,286 +101,110 @@ AgriSol/
 ## 🛠️ Technology Stack
 
 ### 💻 Frontend
-
-| Category | Technology |
+| Layer | Tech |
 |---|---|
-| Framework | React 18 (TypeScript) |
-| Build Tool | Vite 6 |
-| Styling | Tailwind CSS 4 + custom glassmorphism tokens |
-| UI Components | Radix UI + shadcn/ui + MUI |
-| Icons | Lucide React |
-| Charts | Recharts |
-| Animations | Motion (Framer Motion) |
-| Forms | React Hook Form |
-| Routing | React Router 7 |
-| Drag & Drop | React DnD |
-| Notifications | Sonner |
+| Framework | **React 18.3** (TypeScript) |
+| Build Tool | **Vite 6.3** |
+| Styling | **Tailwind CSS 4.1** + Custom Glassmorphism System |
+| UI Components | **Radix UI** primitives + **shadcn/ui** |
+| Data Visualisation | **Recharts 2.15** (Line, Area, Radar, Pie Charts) |
+| Icons | **Lucide React** |
+| Motion | **Framer Motion / Motion 12** |
 
-### 🔌 Backend (`backend`)
-
-| Category | Technology |
+### 🔌 Backend
+| Layer | Tech |
 |---|---|
-| Runtime | Node.js 18+ |
-| Framework | Express.js |
-| Database | MongoDB + Mongoose 8 |
-| Caching | Redis + ioredis |
-| Queues | Bull Queue |
-| Auth | JWT + bcryptjs + OTP (SMS/Email fallback) |
-| Real-time | Socket.IO |
-| File Uploads | Multer + Cloudinary |
-| Email | Nodemailer |
-| SMS | Twilio |
-| Push Notifications | Firebase Admin SDK |
-| Logging | Winston + daily rotate |
-| Validation | Joi + express-validator |
-| Security | Helmet, express-rate-limit, express-mongo-sanitize, xss-clean, HPP |
-| Scheduler | node-cron |
-| API Docs | Swagger UI (`/api-docs`) |
-| i18n | i18next (English, Hindi, Marathi) |
-| Testing | Jest 29 + Supertest |
+| Runtime | **Node.js 20+** |
+| Web Framework | **Express.js 4** |
+| Database | **MongoDB / Mongoose 8** |
+| Caching | **Redis / ioredis** |
+| Authentication | **JWT** + **bcryptjs** + **OTP engine** |
+| API Docs | **Swagger UI** (`/api-docs`) |
+| Real-time Alerts | **Socket.IO** |
+| Logging | **Winston** daily rotating logs |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
 ### Prerequisites
+- **Node.js**: v18.0 or higher (`node -v`)
+- **npm**: v9.0 or higher
 
-- **Node.js** >= 18.0.0
-- **MongoDB** (local or Atlas)
-- **Redis** (local or Upstash)
-
-### 1. Clone the repository
+### 1. Clone & Install
 
 ```bash
-git clone https://github.com/your-org/AgriSol.git
+git clone https://github.com/chaitanyabhujbal912006-afk/AgriSol.git
 cd AgriSol
 ```
 
-### 2. Primary Backend (`backend1`)
+### 2. Backend Setup
 
 ```bash
-cd backend1
-
-# Copy example env and fill in your credentials
+cd backend
 cp .env.example .env
-
-# Install dependencies
 npm install
+npm run seed      # Seeds demo farmers, market prices, and ICAR experts
+npm run dev       # Starts server at http://localhost:5000
+```
+> **Console OTP Mode**: In local development, SMS/Email OTP codes automatically print directly to the backend terminal (`🔑 [AGRISOL OTP CODE]`).
 
-# Seed demo data (farmers, market prices, schemes, community posts)
-npm run seed
+### 3. Frontend Setup
 
-# Run tests
-npm test
-
-# Start development server
-npm run dev
+```bash
+cd ../frontend
+npm install
+npm run dev       # Starts Vite dev server at http://localhost:5173
 ```
 
-> Server runs at **`http://localhost:5000`** · Swagger docs at **`http://localhost:5000/api-docs`**
+---
 
-### 3. Frontend
+## 🌐 Production Deployment
 
+### Deploying Frontend on Vercel
+1. Connect your GitHub repository to [Vercel](https://vercel.com).
+2. Set Root Directory to `frontend`.
+3. Build Command: `npm run build` | Output Directory: `dist`.
+4. The included `frontend/vercel.json` automatically handles SPA routes.
+
+### Deploying Frontend via Docker
 ```bash
 cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
+docker build -t agrisol-frontend .
+docker run -p 80:80 agrisol-frontend
 ```
 
-> Frontend opens at **`http://localhost:5173`**
-
-### 4. Docker (optional)
-
-```bash
-cd backend1
-docker-compose up --build
-```
+### Deploying Backend on Render / Railway
+1. Create a Web Service on Render or Railway pointing to the `backend` directory.
+2. Set Environment Variables as listed in `backend/.env.example`.
+3. Start Command: `npm start`.
 
 ---
 
-## 🔌 API Route Map (`/api/v1`)
+## 🔌 API Reference (`/api/v1`)
 
-### 🔐 Authentication
-
-| Method | Endpoint | Access | Description |
+| Method | Endpoint | Description | Access |
 |---|---|---|---|
-| `GET` | `/health` | Public | System status, version, and uptime |
-| `GET` | `/api-docs` | Public | Interactive Swagger documentation |
-| `POST` | `/api/v1/auth/register` | Public | Register farmer account + send OTP |
-| `POST` | `/api/v1/auth/login` | Public | Authenticate with mobile & password |
-| `POST` | `/api/v1/auth/verify-otp` | Public | Validate OTP and issue JWT |
-| `POST` | `/api/v1/auth/resend-otp` | Public | Resend verification code |
-
-### 🧑‍🌾 Farmers
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/farmers` | Protected | List farmer profiles |
-| `GET` | `/api/v1/farmers/:id` | Protected | Get farmer profile by ID |
-| `PUT` | `/api/v1/farmers/:id` | Protected | Update farmer profile |
-
-### 🌱 Crops
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/crops` | Public | Browse crop catalogue |
-| `POST` | `/api/v1/crops/recommend` | Protected | AI crop recommendation engine |
-| `GET` | `/api/v1/crops/:id` | Public | Get crop details |
-
-### 🌍 Soil Diagnostics
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/soil/analyze` | Protected | Upload soil photo for AI classification & NPK report |
-| `GET` | `/api/v1/soil/history` | Protected | Retrieve past soil test records |
-
-### 🍃 Disease Detection
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/disease/report` | Protected | Upload leaf image for computer-vision disease diagnosis |
-| `GET` | `/api/v1/disease/outbreak-map` | Public | Regional disease outbreak statistics |
-
-### 🌤️ Weather
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/weather` | Public | Current and forecast weather data |
-
-### 📈 Market Prices
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/market/prices` | Public | Live APMC market price trends & crop rate predictions |
-
-### 🏛️ Government Schemes
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/schemes` | Public | Filterable central & state government farmer schemes |
-
-### 💬 Community
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/community/posts` | Public | Farmer Q&A, expert advice, and pest alert forum |
-| `POST` | `/api/v1/community/posts` | Protected | Create a community post |
-
-### 📅 Growth Calendar
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/calendar/events` | Protected | Retrieve crop growth calendar schedule |
-| `POST` | `/api/v1/calendar/events` | Protected | Schedule new crop / irrigation / fertilizer event |
-| `PATCH` | `/api/v1/calendar/events/:id/toggle` | Protected | Toggle completion status of a calendar event |
-
-### 🤖 AI Chat
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `POST` | `/api/v1/chat/message` | Protected | AI agricultural adviser chatbot |
-
-### 🔔 Notifications
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/notifications` | Protected | Get user notification feed |
-| `PATCH` | `/api/v1/notifications/:id/read` | Protected | Mark notification as read |
-
-### 📊 Analytics
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/analytics/dashboard` | Protected | Aggregated farm analytics |
-
-### 🛡️ Admin
-
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| `GET` | `/api/v1/admin/users` | Admin | Manage platform users |
-| `GET` | `/api/v1/admin/reports` | Admin | Platform-wide reports |
+| `GET` | `/health` | System status & uptime | Public |
+| `POST` | `/api/v1/auth/signup` | Register farmer user & generate OTP | Public |
+| `POST` | `/api/v1/auth/signin` | Authenticate credentials & return JWT | Public |
+| `POST` | `/api/v1/auth/verify-otp` | Verify 6-digit code | Public |
+| `POST` | `/api/v1/soil/analyze` | AI soil photo analysis & NPK report | Protected |
+| `POST` | `/api/v1/crops/recommend` | Soil & climate crop recommendation engine | Protected |
+| `POST` | `/api/v1/diseases/diagnose` | Computer-vision leaf pathogen detection | Protected |
+| `GET` | `/api/v1/market/prices` | APMC market prices & trend forecasts | Public |
+| `GET` | `/api/v1/schemes` | Central & state government subsidies | Public |
+| `GET` | `/api/v1/calendar/events` | Retrieve growth schedule tasks | Protected |
+| `POST` | `/api/v1/chatbot/message` | AI Agronomist advice assistant | Protected |
 
 ---
 
-## 🧪 Testing
+## 🛡️ License
 
-```bash
-cd backend1
-npm test   # runs Jest with coverage
-```
-
-| Test File | Coverage |
-|---|---|
-| `tests/health.test.js` | Health check, welcome route, and API route mapping |
-| `tests/soil.test.js` | Soil analysis submission, classification, and history |
-| `tests/disease.test.js` | AI disease report upload and outbreak analytics |
-| `tests/calendar.test.js` | Calendar event creation, listing, and task toggles |
+Distributed under the MIT License. See `LICENSE` for details.
 
 ---
 
-## 🌐 Internationalisation (i18n)
-
-| Locale | Language |
-|---|---|
-| `en` | English |
-| `hi` | Hindi |
-| `mr` | Marathi |
-
-Translation JSON files live in `backend1/locales/`.
-
----
-
-## 🔑 Environment Variables
-
-Copy `backend1/.env.example` to `backend1/.env` and configure:
-
-| Variable | Description |
-|---|---|
-| `MONGO_URI` | MongoDB connection string |
-| `JWT_SECRET` | Secret key for JWT signing |
-| `REDIS_URL` | Redis connection URL |
-| `CLOUDINARY_*` | Cloudinary API credentials for image uploads |
-| `EMAIL_USER` / `EMAIL_PASS` | Gmail SMTP credentials (optional) |
-| `TWILIO_*` | Twilio credentials for SMS OTP |
-| `FIREBASE_*` | Firebase Admin SDK for push notifications |
-
-> **Dev tip:** Without SMTP or Twilio credentials, OTPs are automatically logged to the backend terminal (`🔑 [AGRISOL OTP CODE]`), so local development works out-of-the-box.
-
----
-
-## ✅ Frontend Features
-
-| Page | Highlights |
-|---|---|
-| Dashboard | Recharts telemetry (soil moisture, temperature, NPK radar), task toggles, region switcher |
-| Soil Diagnostics | 1-click sample presets, animated CV radar scan, NPK & pH breakdown |
-| Disease Detection | Bounding box overlay with confidence score, pathogen database, treatment protocols |
-| Yield & Profit Estimator | Acreage calculator — total yield, gross revenue, input costs, net profit |
-| Growth Calendar | Interactive event creation modal, completion filters |
-| AI Adviser Chatbot | Voice mode audio wave visualiser, category prompt pills |
-| Market Prices | APMC live price trends and crop rate predictions |
-| Government Schemes | Filterable scheme discovery portal |
-| Community Forum | Farmer Q&A, expert advice, pest alert threads |
-| Reports | Farmland crop allocation pie chart + instant PDF export |
-| Notifications | Alert centre for frost warnings, soil reports, and task reminders |
-| Global Search | Command palette with instant autocomplete across crops, tools, and pages |
-
----
-
-## 📌 Roadmap
-
-- [ ] Deploy frontend to Vercel / Netlify
-- [ ] Deploy backend to Render / Railway
-- [ ] Live Gmail SMTP + Twilio SMS in production
-- [ ] Expand AI disease model coverage
-- [ ] Mobile app (React Native)
-
----
-
-## 📄 License
-
-MIT © AgriSol Contributors
+<p align="center">
+  <b>AgriSol</b> — Elevating Precision Agriculture for Every Farmer. 🌾
+</p>
