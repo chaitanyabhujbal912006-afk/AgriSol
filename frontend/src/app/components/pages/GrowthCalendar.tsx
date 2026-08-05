@@ -575,7 +575,7 @@ export function GrowthCalendar({ onNavigate, navigationData, userRole }: GrowthC
               <Card key={status} className="glass-card border-0">
                 <CardHeader>
                   <CardTitle className="capitalize flex items-center gap-2">
-                    {status === 'completed' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                    {status === 'completed' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                     {status === 'pending' && <Clock className="w-5 h-5 text-yellow-500" />}
                     {status === 'scheduled' && <CalendarIcon className="w-5 h-5 text-blue-500" />}
                     {status} Tasks
