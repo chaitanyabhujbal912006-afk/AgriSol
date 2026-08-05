@@ -10,7 +10,8 @@ import {
   ArrowRight,
   Check,
   Globe,
-  RefreshCw
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -82,6 +83,52 @@ export function Auth({ onNavigate }: AuthProps) {
         return prev - 1;
       });
     }, 1000);
+  };
+
+  const handleDemoPreset = (preset: 'farmer' | 'expert') => {
+    if (preset === 'farmer') {
+      const demoFarmer = {
+        _id: 'demo-farmer-01',
+        name: 'Ramesh Sharma',
+        mobile: '9876543210',
+        email: 'ramesh.sharma@agrisol.in',
+        role: 'farmer',
+        isVerified: true,
+        village: 'Lakhimpur',
+        district: 'Nashik',
+        state: 'Maharashtra',
+        pincode: '422001',
+        landSize: { value: 5.5, unit: 'acres' },
+        cropsGrown: ['Durum Wheat', 'Nashik Red Onion', 'Soybean'],
+        farmingType: 'conventional',
+        soilType: 'Black Loam',
+        irrigationType: 'Drip & Sprinkler',
+      };
+      localStorage.setItem('agrisol_token', 'demo-token-farmer-01');
+      localStorage.setItem('agrisol_user', JSON.stringify(demoFarmer));
+      onNavigate('dashboard');
+    } else {
+      const demoExpert = {
+        _id: 'demo-expert-01',
+        name: 'Dr. Suresh Patil',
+        mobile: '9000000002',
+        email: 'dr.suresh.patil@icar.gov.in',
+        role: 'expert',
+        isVerified: true,
+        state: 'Maharashtra',
+        district: 'Pune',
+        expertProfile: {
+          specialization: ['Plant Pathology', 'Soil Chemistry & NPK Analysis', 'Integrated Pest Management'],
+          qualifications: 'Ph.D. Agricultural Sciences, IARI Delhi',
+          experience: 15,
+          organization: 'ICAR - National Institute of Abiotic Stress Management',
+          rating: 4.9,
+        }
+      };
+      localStorage.setItem('agrisol_token', 'demo-token-expert-01');
+      localStorage.setItem('agrisol_user', JSON.stringify(demoExpert));
+      onNavigate('dashboard');
+    }
   };
 
   /* ──────────────────────────────────────────────
@@ -342,6 +389,31 @@ export function Auth({ onNavigate }: AuthProps) {
                       </svg>
                       Continue with Google
                     </Button>
+
+                    <div className="p-3 bg-emerald-950/70 border border-emerald-500/40 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between text-xs text-emerald-300 font-semibold">
+                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Instant Demo Trial Access</span>
+                        <Badge variant="outline" className="text-[10px] bg-emerald-500/20 border-emerald-500/40 text-emerald-300">Authentic Data</Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium py-2 h-auto"
+                          onClick={() => handleDemoPreset('farmer')}
+                        >
+                          👨‍🌾 Demo Farmer
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="bg-teal-700 hover:bg-teal-600 text-white text-xs font-medium py-2 h-auto"
+                          onClick={() => handleDemoPreset('expert')}
+                        >
+                          👨‍🔬 ICAR Expert
+                        </Button>
+                      </div>
+                    </div>
 
                     <div className="relative">
                       <Separator className="bg-white/20" />
