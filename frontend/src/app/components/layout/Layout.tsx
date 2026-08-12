@@ -438,7 +438,7 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
               </div>
               
               {/* iPhone Inner Screen Frame */}
-              <div className="flex-1 bg-slate-50 dark:bg-neutral-950 rounded-[44px] overflow-y-auto pt-10 pb-16 px-3 scrollbar-none relative">
+              <div className="iphone-frame flex-1 bg-slate-50 dark:bg-neutral-950 rounded-[44px] overflow-y-auto pt-10 pb-16 px-3 scrollbar-none relative">
                 {children}
               </div>
 

@@ -123,98 +123,98 @@ export function Dashboard({ onNavigate, userRole }: DashboardProps) {
     <div className="space-y-8">
       {/* Top Banner Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 animate-fade-in-up">
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 px-3 py-1 font-bold text-xs rounded-full">
               ✨ AgriSol Telemetry v2.4 Active
             </Badge>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2">
-            Welcome back, <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 bg-clip-text text-transparent">{userName}</span>! 🌾
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-2 break-words leading-tight">
+            Welcome back, <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 bg-clip-text text-transparent inline-block max-w-full truncate align-bottom">{userName}</span>! 🌾
           </h1>
-          <p className="text-slate-500 dark:text-neutral-400 text-sm mt-1">
+          <p className="text-slate-500 dark:text-neutral-400 text-xs sm:text-sm mt-1">
             Real-time IoT sensors and satellite telemetry online. Here is your digital farm report today.
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
           <Button
             onClick={() => onNavigate('soil-prediction')}
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-lg shadow-emerald-500/20 rounded-xl px-5 h-11 font-semibold text-sm transition-all hover:scale-[1.02]"
+            className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white border-0 shadow-lg shadow-emerald-500/20 rounded-xl px-4 sm:px-5 h-10 sm:h-11 font-semibold text-xs sm:text-sm transition-all hover:scale-[1.02]"
           >
-            <TestTube className="w-4 h-4 mr-2" />
+            <TestTube className="w-4 h-4 mr-1.5 sm:mr-2" />
             Scan Soil Chemistry
           </Button>
           <Button
             variant="outline"
             onClick={() => onNavigate('crop-recommendation')}
-            className="rounded-xl border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-200 h-11 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-neutral-900"
+            className="flex-1 sm:flex-none rounded-xl border border-slate-200 dark:border-neutral-800 text-slate-700 dark:text-neutral-200 h-10 sm:h-11 text-xs sm:text-sm font-semibold hover:bg-slate-100 dark:hover:bg-neutral-900"
           >
-            <Sprout className="w-4 h-4 mr-2 text-emerald-500" />
+            <Sprout className="w-4 h-4 mr-1.5 sm:mr-2 text-emerald-500" />
             Crop Advisor
           </Button>
         </div>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-1">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
-                <Sprout className="w-6 h-6" />
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <Sprout className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-right">
-                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">12</p>
-                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">+3 recommended</p>
+              <div className="text-right min-w-0 flex-1">
+                <p className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight truncate">12</p>
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 truncate">+3 recommended</p>
               </div>
             </div>
-            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Active Recommended Crops</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-3 truncate">Active Recommended Crops</p>
           </CardContent>
         </Card>
 
         <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-2">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
-                <MapPin className="w-6 h-6" />
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 shrink-0">
+                <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-right">
-                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">50.0</p>
-                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Acres Managed</p>
+              <div className="text-right min-w-0 flex-1">
+                <p className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight truncate">50.0</p>
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 truncate">Acres Managed</p>
               </div>
             </div>
-            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Cultivated Farmland</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-3 truncate">Cultivated Farmland</p>
           </CardContent>
         </Card>
 
         <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-3">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
-                <Clock className="w-6 h-6" />
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 shrink-0">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-right">
-                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">{pendingCount}</p>
-                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400">{completedCount} completed today</p>
+              <div className="text-right min-w-0 flex-1">
+                <p className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight truncate">{pendingCount}</p>
+                <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 truncate">{completedCount} completed today</p>
               </div>
             </div>
-            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Pending Tasks</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-3 truncate">Pending Tasks</p>
           </CardContent>
         </Card>
 
         <Card className="glass-card-premium border-0 opacity-0 animate-fade-in-up animate-stagger-4">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400">
-                <Activity className="w-6 h-6" />
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="p-2.5 sm:p-3 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 shrink-0">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-right">
-                <p className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight">88%</p>
-                <p className="text-[10px] font-bold text-teal-600 dark:text-teal-400">Optimal Fertility</p>
+              <div className="text-right min-w-0 flex-1">
+                <p className="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight truncate">88%</p>
+                <p className="text-[10px] font-bold text-teal-600 dark:text-teal-400 truncate">Optimal Fertility</p>
               </div>
             </div>
-            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-4">Soil Health Index</p>
+            <p className="text-xs font-bold text-slate-500 dark:text-neutral-400 mt-3 truncate">Soil Health Index</p>
           </CardContent>
         </Card>
       </div>

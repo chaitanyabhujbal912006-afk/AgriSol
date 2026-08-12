@@ -386,6 +386,23 @@
     0%, 100% { height: 6px; }
     50% { height: 24px; }
   }
+
+  /* iPhone Frame Mobile Container Overrides */
+  .iphone-frame .grid,
+  .iphone-frame [class*="lg:grid-cols-"],
+  .iphone-frame [class*="sm:grid-cols-"],
+  .iphone-frame [class*="md:grid-cols-"] {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .iphone-frame .iphone-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .iphone-frame h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
 }
 
 /* Base Typography */
