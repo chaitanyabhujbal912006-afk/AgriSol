@@ -550,8 +550,12 @@ export function Landing({ onNavigate }: LandingProps) {
             </div>
           </div>
 
-          <div className="border-t border-slate-800 dark:border-neutral-900 mt-12 pt-8 text-center text-xs text-slate-500">
-            <p>&copy; 2026 FarmerAI. AgriSol Agricultural Platforms. Built with ❤️ for farmers worldwide.</p>
+          <div className="border-t border-slate-800 dark:border-neutral-900 mt-12 pt-8 text-center text-xs text-slate-500 space-y-3">
+            <div className="inline-flex flex-col sm:flex-row items-center gap-2 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-4 py-2 rounded-2xl text-[11px] font-medium max-w-2xl mx-auto">
+              <span className="font-bold flex items-center gap-1">🚧 Work in Progress Notice:</span>
+              <span className="text-slate-300">AgriSol is currently running in Frontend Interactive Preview Mode. Real data streams, IoT hardware telemetry, and AI model backends are under active development.</span>
+            </div>
+            <p>&copy; 2026 AgriSol. Built with ❤️ for farmers worldwide.</p>
           </div>
         </div>
       </footer>

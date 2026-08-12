@@ -440,6 +440,16 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
               {/* iPhone Inner Screen Frame */}
               <div className="iphone-frame flex-1 bg-slate-50 dark:bg-neutral-950 rounded-[44px] overflow-y-auto pt-10 pb-16 px-3 scrollbar-none relative">
                 {children}
+
+                {/* Work In Progress Banner */}
+                <div className="mt-8 pt-4 border-t border-slate-200/60 dark:border-neutral-800/60 text-center pb-4">
+                  <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px] font-bold rounded-full px-3 py-1">
+                    🚧 Work in Progress — Frontend Demo Mode
+                  </Badge>
+                  <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+                    Real-time IoT sensors, APMC mandi feeds & live AI backends are under active development.
+                  </p>
+                </div>
               </div>
 
               {/* iPhone Home Bar */}
@@ -447,8 +457,30 @@ export function Layout({ children, currentPage = 'dashboard', onNavigate }: Layo
             </div>
           </div>
         ) : (
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-28 lg:pb-12 max-w-7xl w-full mx-auto animate-fade-in">
-            {children}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-28 lg:pb-12 max-w-7xl w-full mx-auto animate-fade-in flex flex-col justify-between">
+            <div>
+              {children}
+            </div>
+
+            {/* Work In Progress Footer Notice */}
+            <div className="mt-12 pt-6 border-t border-slate-200/60 dark:border-neutral-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-sm shrink-0 border border-amber-500/20">
+                  🚧
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-700 dark:text-neutral-200">
+                    Work in Progress — Frontend Interactive Mode
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Real-time IoT sensor telemetry, live APMC mandi data feeds, and AI backend pipelines are under active development.
+                  </p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/5 px-3 py-1 font-semibold rounded-full shrink-0">
+                v2.4 Interactive Prototype
+              </Badge>
+            </div>
           </main>
         )}
       </div>
