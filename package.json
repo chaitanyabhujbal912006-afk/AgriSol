@@ -1,7 +1,12 @@
 {
   "name": "agrisol-workspace",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
+    "postinstall": "npm --prefix frontend install",
     "build": "npm --prefix frontend run build"
   }
 }
+
